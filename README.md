@@ -1,1 +1,1 @@
-Notes server "Andúril"
+Andúril note server
