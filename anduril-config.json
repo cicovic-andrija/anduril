@@ -1,0 +1,14 @@
+{
+    "https": {
+        "network": {
+            "ip_accept_host": "localhost",
+            "tcp_port": 8080,
+            "tls_cert_path": "certfile.crt",
+            "tls_key_path": "keyfile.key"
+        },
+        "enable_file_server": true,
+        "file_server_directory": "static",
+        "logs_directory": "logs",
+        "log_requests": true
+    }
+}
