@@ -7,8 +7,11 @@
             "tls_key_path": "keyfile.key"
         },
         "enable_file_server": true,
-        "file_server_directory": "static",
-        "logs_directory": "logs",
-        "log_requests": true
+        "file_server": {
+            "directory": "static",
+            "url_prefix": "/static/"
+        },
+        "log_requests": true,
+        "logs_directory": "logs"
     }
 }
