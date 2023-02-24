@@ -21,5 +21,5 @@ func Run() {
 		panic(err)
 	}
 
-	server.Run()
+	server.ListenAndServe()
 }
