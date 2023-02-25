@@ -1,7 +1,6 @@
 package anduril
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -31,12 +30,12 @@ func readEnv() (*envinfo, error) {
 }
 
 func initEnv(env *envinfo) error {
-	if exists, err := util.DirectoryExists(env.logsDirPath()); err != nil {
-		return fmt.Errorf("failed to stat logs directory: %v", err)
-	} else if !exists {
-		if err := os.Mkdir(env.logsDirPath(), os.ModePerm); err != nil {
-			return fmt.Errorf("failed to create logs directory: %v", err)
-		}
+	if err := util.MkdirIfNotExists(env.workDirPath()); err != nil {
+		return err
+	}
+
+	if err := util.MkdirIfNotExists(env.logsDirPath()); err != nil {
+		return err
 	}
 
 	env.initd = true
@@ -45,6 +44,10 @@ func initEnv(env *envinfo) error {
 
 func (env *envinfo) configPath() string {
 	return filepath.Join(env.wd, "anduril-config.json")
+}
+
+func (env *envinfo) workDirPath() string {
+	return filepath.Join(env.wd, "work")
 }
 
 func (env *envinfo) logsDirPath() string {

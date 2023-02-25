@@ -3,6 +3,7 @@ package anduril
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -52,6 +53,7 @@ func (s *WebServer) ListenAndServe() {
 	s.log("primary log location: %s", s.logger.LogPath())
 	s.log("HTTPS server log location: %s", s.httpsServer.GetLogPath())
 	s.log("HTTPS requests log location: %s", s.httpsServer.GetRequestsLogPath())
+	s.registerHandlers()
 	s.listenAndServeInternal()
 }
 
@@ -78,11 +80,44 @@ func (s *WebServer) listenAndServeInternal() {
 	}
 }
 
+func (s *WebServer) registerHandlers() {
+	s.httpsServer.Handle(
+		"/",
+		http.HandlerFunc(s.RootHandler),
+	)
+
+	s.httpsServer.Handle(
+		"/topics",
+		http.HandlerFunc(s.TopicRootHandler),
+	)
+
+	s.httpsServer.Handle(
+		"/topics/",
+		https.Adapt(
+			http.HandlerFunc(s.TopicHandler),
+			https.RedirectRootToParentTree,
+		),
+	)
+
+	s.httpsServer.Handle(
+		"/articles",
+		http.HandlerFunc(s.PageNotFoundHandler),
+	)
+
+	s.httpsServer.Handle(
+		"/articles/",
+		https.Adapt(
+			http.HandlerFunc(s.ArticleHandler),
+			https.RedirectRootToParentTree,
+		),
+	)
+}
+
 func (s *WebServer) log(format string, v ...interface{}) {
 	s.logger.Output(util.SevInfo, 2, format, v...)
 }
 
-func (s *WebServer) logwarn(format string, v ...interface{}) {
+func (s *WebServer) warn(format string, v ...interface{}) {
 	s.logger.Output(util.SevWarn, 2, format, v...)
 }
 

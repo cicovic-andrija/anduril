@@ -11,6 +11,7 @@
             "directory": "static",
             "url_prefix": "/static/"
         },
-        "log_requests": true
+        "log_requests": true,
+        "allow_only_get_requests": true
     }
 }
