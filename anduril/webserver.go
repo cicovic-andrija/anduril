@@ -3,7 +3,6 @@ package anduril
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -15,7 +14,6 @@ import (
 type WebServer struct {
 	env         *envinfo
 	httpsServer *https.HTTPSServer
-	taskManager *util.TaskManager
 	logger      *util.FileLog
 	startedAt   time.Time
 }
@@ -39,7 +37,6 @@ func NewWebServer(env *envinfo, config *Config) (server *WebServer, err error) {
 	webServer := &WebServer{
 		env:         env,
 		httpsServer: httpsServer,
-		taskManager: util.NewTaskManager(&logger.Logger),
 		logger:      logger,
 	}
 
@@ -54,6 +51,7 @@ func (s *WebServer) ListenAndServe() {
 	s.log("HTTPS server log location: %s", s.httpsServer.GetLogPath())
 	s.log("HTTPS requests log location: %s", s.httpsServer.GetRequestsLogPath())
 	s.registerHandlers()
+	s.processBatch(s.env.workDirPath())
 	s.listenAndServeInternal()
 }
 
@@ -78,51 +76,4 @@ func (s *WebServer) listenAndServeInternal() {
 			panic(s.error("HTTPS server stopped unexpectedly:  %v", httpsServerError))
 		}
 	}
-}
-
-func (s *WebServer) registerHandlers() {
-	s.httpsServer.Handle(
-		"/",
-		http.HandlerFunc(s.RootHandler),
-	)
-
-	s.httpsServer.Handle(
-		"/topics",
-		http.HandlerFunc(s.TopicRootHandler),
-	)
-
-	s.httpsServer.Handle(
-		"/topics/",
-		https.Adapt(
-			http.HandlerFunc(s.TopicHandler),
-			https.RedirectRootToParentTree,
-		),
-	)
-
-	s.httpsServer.Handle(
-		"/articles",
-		http.HandlerFunc(s.PageNotFoundHandler),
-	)
-
-	s.httpsServer.Handle(
-		"/articles/",
-		https.Adapt(
-			http.HandlerFunc(s.ArticleHandler),
-			https.RedirectRootToParentTree,
-		),
-	)
-}
-
-func (s *WebServer) log(format string, v ...interface{}) {
-	s.logger.Output(util.SevInfo, 2, format, v...)
-}
-
-func (s *WebServer) warn(format string, v ...interface{}) {
-	s.logger.Output(util.SevWarn, 2, format, v...)
-}
-
-func (s *WebServer) error(format string, v ...interface{}) error {
-	err := fmt.Errorf(format, v...)
-	s.logger.Output(util.SevError, 2, format, v...)
-	return err
 }
