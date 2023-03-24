@@ -12,12 +12,12 @@ import (
 // Structure and routines for processing data files in markdown format.
 
 type MarkdownMetadata struct {
-	Title        string    `json:"title"`
-	Tags         []string  `json:"tags"`
-	Created      string    `json:"created"`
-	CreatedTime  time.Time `json:"-"`
-	Modified     string    `json:"modified"`
-	ModifiedTime time.Time `json:"-"`
+	Title        string    `yaml:"title"`
+	Tags         []string  `yaml:"tags"`
+	Created      string    `yaml:"created"`
+	CreatedTime  time.Time `yaml:"-"`
+	Modified     string    `yaml:"modified"`
+	ModifiedTime time.Time `yaml:"-"`
 }
 
 func (s *WebServer) processBatch(workDirPath string) error {
