@@ -7,14 +7,20 @@ import (
 	"github.com/cicovic-andrija/go-util"
 )
 
-type envinfo struct {
+const (
+	repositorySubdir = "repository"
+	compiledSubdir   = "compiled"
+	staticSubdir     = "static"
+)
+
+type environment struct {
 	wd    string
 	pid   int
 	initd bool
 }
 
-func readEnv() (*envinfo, error) {
-	env := &envinfo{
+func readEnv() (*environment, error) {
+	env := &environment{
 		initd: false,
 	}
 
@@ -29,31 +35,35 @@ func readEnv() (*envinfo, error) {
 	return env, nil
 }
 
-func initEnv(env *envinfo) error {
-	if err := util.MkdirIfNotExists(env.workDirPath()); err != nil {
-		return err
-	}
-
-	if err := util.MkdirIfNotExists(env.logsDirPath()); err != nil {
-		return err
+func initEnv(env *environment) error {
+	for _, directory := range []string{
+		env.workDirectoryPath(),
+		filepath.Join(env.workDirectoryPath(), repositorySubdir),
+		filepath.Join(env.workDirectoryPath(), compiledSubdir),
+		filepath.Join(env.workDirectoryPath(), staticSubdir),
+		env.logsDirectoryPath(),
+	} {
+		if err := util.MkdirIfNotExists(directory); err != nil {
+			return err
+		}
 	}
 
 	env.initd = true
 	return nil
 }
 
-func (env *envinfo) configPath() string {
+func (env *environment) configPath() string {
 	return filepath.Join(env.wd, "anduril-config.json")
 }
 
-func (env *envinfo) workDirPath() string {
+func (env *environment) workDirectoryPath() string {
 	return filepath.Join(env.wd, "work")
 }
 
-func (env *envinfo) logsDirPath() string {
+func (env *environment) logsDirectoryPath() string {
 	return filepath.Join(env.wd, "logs")
 }
 
-func (env *envinfo) primaryLogPath() string {
-	return filepath.Join(env.logsDirPath(), "anduril.log")
+func (env *environment) primaryLogPath() string {
+	return filepath.Join(env.logsDirectoryPath(), "anduril.log")
 }

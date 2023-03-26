@@ -8,7 +8,15 @@ import (
 )
 
 type Config struct {
-	HTTPS https.Config `json:"https"`
+	HTTPS      https.Config     `json:"https"`
+	Repository RepositoryConfig `json:"repository"`
+}
+
+type RepositoryConfig struct {
+	URL          string `json:"url"`
+	Remote       string `json:"remote"`
+	Branch       string `json:"branch"`
+	RelativePath string `json:"relative_path"`
 }
 
 func readConfig(path string) (*Config, error) {

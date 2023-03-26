@@ -20,7 +20,7 @@ modified: '2023-03-03T17:34:50.396Z'
 	expectedTag1 := "ssi"
 	expectedCreated := "2023-03-01T20:01:32.854Z"
 	expectedModified := "2023-03-03T17:34:50.396Z"
-	metadata := &anduril.MarkdownMetadata{}
+	metadata := &anduril.ArticleMetadata{}
 	err := yfm.Parse(strings.NewReader(input), metadata)
 	if err != nil {
 		t.Fatalf("parsing failed: %v", err)
@@ -43,4 +43,21 @@ modified: '2023-03-03T17:34:50.396Z'
 	if metadata.Modified != expectedModified {
 		t.Fatalf("modified: expected: %q found: %q", expectedModified, metadata.Modified)
 	}
+}
+
+func TestParseWithoutTags(t *testing.T) {
+	input := `---
+title: SSI Dry Suit
+created: '2023-03-01T20:01:32.854Z'
+modified: '2023-03-03T17:34:50.396Z'
+---`
+	metadata := &anduril.ArticleMetadata{}
+	err := yfm.Parse(strings.NewReader(input), metadata)
+	if err != nil {
+		t.Fatalf("parsing failed: %v", err)
+	}
+	if metadata.Tags != nil || len(metadata.Tags) > 0 {
+		t.Fatalf("tags: expected: 0 found: %d", len(metadata.Tags))
+	}
+	t.Logf("number of tags found: %d", len(metadata.Tags))
 }

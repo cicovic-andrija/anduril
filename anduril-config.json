@@ -13,5 +13,11 @@
         },
         "log_requests": true,
         "allow_only_get_requests": true
+    },
+    "repository": {
+        "url": "https://github.com/cicovic-andrija/notes.git",
+        "remote": "origin",
+        "branch": "master",
+        "relative_path": "notes"
     }
 }

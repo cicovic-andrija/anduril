@@ -1,8 +1,10 @@
 package anduril
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/cicovic-andrija/anduril/yfm"
@@ -10,15 +12,6 @@ import (
 )
 
 // Structure and routines for processing data files in markdown format.
-
-type MarkdownMetadata struct {
-	Title        string    `yaml:"title"`
-	Tags         []string  `yaml:"tags"`
-	Created      string    `yaml:"created"`
-	CreatedTime  time.Time `yaml:"-"`
-	Modified     string    `yaml:"modified"`
-	ModifiedTime time.Time `yaml:"-"`
-}
 
 func (s *WebServer) processBatch(workDirPath string) error {
 	if err := util.EnumerateDirectory(
@@ -35,26 +28,73 @@ func (s *WebServer) processBatch(workDirPath string) error {
 	return nil
 }
 
-func (s *WebServer) processDataFile(workDirPath string, dataFileName string) error {
-	file, err := util.OpenFile(filepath.Join(workDirPath, dataFileName))
+func (s *WebServer) processDataFile(workDirPath string, fileName string) error {
+	file, err := util.OpenFile(filepath.Join(workDirPath, fileName))
 	if err != nil {
 		return err
 	}
 
-	articleMetadata := &MarkdownMetadata{}
+	articleMetadata := &ArticleMetadata{}
 	if err := yfm.Parse(file, articleMetadata); err != nil {
 		return fmt.Errorf("failed to parse metadata: %v", err)
 	}
 
-	s.checkpoint(
+	articleMetadata.File = fileName
+	if err := articleMetadata.Normalize(); err != nil {
+		return fmt.Errorf("invalid metadata: %v", err)
+	}
+
+	s.trace(
 		MarkdownProcessorTag,
-		"%s: %q: %v, created:%s modified:%s",
-		dataFileName,
+		"%s (%s): %q: %v, created:%s modified:%s",
+		articleMetadata.File,
+		articleMetadata.Key,
 		articleMetadata.Title,
 		articleMetadata.Tags,
 		articleMetadata.Created,
 		articleMetadata.Modified,
 	)
+
+	return nil
+}
+
+type ArticleMetadata struct {
+	Title        string    `yaml:"title"`
+	Tags         []string  `yaml:"tags"`
+	Created      string    `yaml:"created"`
+	CreatedTime  time.Time `yaml:"-"`
+	Modified     string    `yaml:"modified"`
+	ModifiedTime time.Time `yaml:"-"`
+	File         string    `yaml:"-"`
+	Key          string    `yaml:"-"`
+}
+
+func (md *ArticleMetadata) Normalize() (err error) {
+	if md.Title == "" {
+		err = errors.New("empty title")
+		return
+	}
+
+	if md.Modified == "" {
+		err = errors.New("empty 'modified' timestamp")
+		return
+	} else {
+		md.ModifiedTime, err = time.Parse(time.RFC3339, md.Modified)
+		if err != nil {
+			err = fmt.Errorf("failed to parse 'modified' timestamp: %v", err)
+			return
+		}
+	}
+
+	if md.Created != "" {
+		md.CreatedTime, err = time.Parse(time.RFC3339, md.Created)
+		if err != nil {
+			err = fmt.Errorf("failed to parse 'created' timestamp: %v", err)
+			return
+		}
+	}
+
+	md.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(md.File, ".md")), " ", "-")
 
 	return nil
 }
