@@ -11,6 +11,7 @@ type TraceTag string
 const (
 	MarkdownProcessorTag   TraceTag = "MarkdownProcessor"
 	RepositoryProcessorTag TraceTag = "RepositoryProcessor"
+	ExecutorTag            TraceTag = "Executor"
 )
 
 func (s *WebServer) log(format string, v ...interface{}) {

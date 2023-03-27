@@ -3,6 +3,7 @@ package anduril
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -10,9 +11,10 @@ import (
 
 type RepositoryProcessor struct {
 	RepositoryConfig
-	repo       *git.Repository
-	trace      TraceCallback
-	commitHash string
+	repo     *git.Repository
+	repoRoot string
+	tipHash  string
+	trace    TraceCallback
 }
 
 func (r *RepositoryProcessor) OpenOrClone(path string) error {
@@ -20,12 +22,14 @@ func (r *RepositoryProcessor) OpenOrClone(path string) error {
 	local, err := git.PlainOpen(path)
 	if err != nil {
 		if err == git.ErrRepositoryNotExists {
-			r.trace("local repository not found on: %s", path)
+			r.trace("local repository not found on path %s", path)
 		} else {
 			return fmt.Errorf("open local repository %s: operation failed with error: %v", path, err)
 		}
 	} else {
+		r.trace("opened local repository on path %s", path)
 		r.repo = local
+		r.repoRoot = path
 		return r.ValidateState()
 	}
 
@@ -46,6 +50,7 @@ func (r *RepositoryProcessor) OpenOrClone(path string) error {
 
 	r.trace("repository cloned from remote location %q to local path %s", r.URL, path)
 	r.repo = clone
+	r.repoRoot = path
 	return r.ValidateState()
 }
 
@@ -54,7 +59,7 @@ func (r *RepositoryProcessor) ValidateState() error {
 	if err != nil {
 		return fmt.Errorf("failed to obtain a reference to the current commit: %v", err)
 	}
-	r.trace("current commit hash is %s", current.Hash())
+	r.trace("current checked out commit hash is %s", current.Hash())
 
 	branchRef, err := r.repo.Reference(plumbing.NewBranchReferenceName(r.Branch), false /* resolved */)
 	if err != nil {
@@ -66,6 +71,18 @@ func (r *RepositoryProcessor) ValidateState() error {
 		return fmt.Errorf("current commit is not at the tip of the expected branch: %q", r.Branch)
 	}
 
-	r.commitHash = current.Hash().String()
+	r.tipHash = current.Hash().String()
 	return nil
+}
+
+func (r *RepositoryProcessor) Root() string {
+	return r.repoRoot
+}
+
+func (r *RepositoryProcessor) ContentRoot() string {
+	return filepath.Join(r.repoRoot, r.ContentRelativePath)
+}
+
+func (r *RepositoryProcessor) LatestCommitShortHash() string {
+	return r.tipHash[:10] // this should be safe
 }

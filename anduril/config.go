@@ -13,10 +13,10 @@ type Config struct {
 }
 
 type RepositoryConfig struct {
-	URL          string `json:"url"`
-	Remote       string `json:"remote"`
-	Branch       string `json:"branch"`
-	RelativePath string `json:"relative_path"`
+	URL                 string `json:"url"`
+	Remote              string `json:"remote"`
+	Branch              string `json:"branch"`
+	ContentRelativePath string `json:"content_relative_path"`
 }
 
 func readConfig(path string) (*Config, error) {

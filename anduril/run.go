@@ -1,12 +1,12 @@
 package anduril
 
 func Run() {
-	env, err := readEnv()
+	env, err := readEnvironment()
 	if err != nil {
 		panic(err)
 	}
 
-	err = initEnv(env)
+	err = prepareEnvironment(env)
 	if err != nil {
 		panic(err)
 	}

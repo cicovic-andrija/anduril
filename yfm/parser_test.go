@@ -20,7 +20,7 @@ modified: '2023-03-03T17:34:50.396Z'
 	expectedTag1 := "ssi"
 	expectedCreated := "2023-03-01T20:01:32.854Z"
 	expectedModified := "2023-03-03T17:34:50.396Z"
-	metadata := &anduril.ArticleMetadata{}
+	metadata := &anduril.Article{}
 	err := yfm.Parse(strings.NewReader(input), metadata)
 	if err != nil {
 		t.Fatalf("parsing failed: %v", err)
@@ -51,7 +51,7 @@ title: SSI Dry Suit
 created: '2023-03-01T20:01:32.854Z'
 modified: '2023-03-03T17:34:50.396Z'
 ---`
-	metadata := &anduril.ArticleMetadata{}
+	metadata := &anduril.Article{}
 	err := yfm.Parse(strings.NewReader(input), metadata)
 	if err != nil {
 		t.Fatalf("parsing failed: %v", err)

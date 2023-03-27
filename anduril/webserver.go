@@ -13,11 +13,13 @@ import (
 )
 
 type WebServer struct {
-	env         *environment
-	httpsServer *https.HTTPSServer
-	repository  *RepositoryProcessor
-	logger      *util.FileLog
-	startedAt   time.Time
+	env            *environment
+	httpsServer    *https.HTTPSServer
+	repository     *RepositoryProcessor
+	latestRevision *Revision
+	executor       *Executor
+	logger         *util.FileLog
+	startedAt      time.Time
 }
 
 func NewWebServer(env *environment, config *Config) (server *WebServer, err error) {
@@ -49,6 +51,12 @@ func NewWebServer(env *environment, config *Config) (server *WebServer, err erro
 		repo:             nil,
 	}
 
+	webServer.latestRevision = nil
+
+	webServer.executor = &Executor{
+		trace: webServer.generateTraceCallback(ExecutorTag),
+	}
+
 	return webServer, nil
 }
 
@@ -59,11 +67,27 @@ func (s *WebServer) ListenAndServe() {
 	s.log("primary log location: %s", s.logger.LogPath())
 	s.log("HTTPS server log location: %s", s.httpsServer.GetLogPath())
 	s.log("HTTPS requests log location: %s", s.httpsServer.GetRequestsLogPath())
+
+	s.testGit()
+
 	s.listenAndServeInternal()
 }
 
-func (s *WebServer) prepareEnvironment() {
+func (s *WebServer) testGit() {
+	err := s.repository.OpenOrClone(filepath.Join(s.env.workDirectoryPath(), repositorySubdir))
+	if err != nil {
+		s.error("%v", err)
+		return
+	}
 
+	revision := &Revision{
+		Articles:      make(map[string]*Article),
+		Tags:          make(map[string][]*Article),
+		ContainerPath: s.repository.ContentRoot(),
+		Hash:          s.repository.LatestCommitShortHash(),
+	}
+
+	s.processRevision(revision)
 }
 
 func (s *WebServer) listenAndServeInternal() {
