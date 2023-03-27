@@ -13,7 +13,7 @@ import (
 )
 
 type WebServer struct {
-	env            *environment
+	env            *Environment
 	httpsServer    *https.HTTPSServer
 	repository     *RepositoryProcessor
 	latestRevision *Revision
@@ -22,18 +22,18 @@ type WebServer struct {
 	startedAt      time.Time
 }
 
-func NewWebServer(env *environment, config *Config) (server *WebServer, err error) {
+func NewWebServer(env *Environment, config *Config) (server *WebServer, err error) {
 	if env == nil || !env.initd {
 		return nil, errors.New("environment not initialized")
 	}
 
-	logger, err := util.NewFileLog(env.primaryLogPath())
+	logger, err := util.NewFileLog(env.PrimaryLogPath())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create primary log file: %v", err)
 	}
 
-	config.HTTPS.LogsDirectory = env.logsDirectoryPath()
-	config.HTTPS.FileServer.Directory = filepath.Join(env.workDirectoryPath(), staticSubdir)
+	config.HTTPS.LogsDirectory = env.LogsDirectoryPath()
+	config.HTTPS.FileServer.Directory = filepath.Join(env.DataDirectoryPath(), staticSubdir)
 	httpsServer, err := https.NewServer(&config.HTTPS)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init HTTPS server: %v", err)
@@ -74,7 +74,7 @@ func (s *WebServer) ListenAndServe() {
 }
 
 func (s *WebServer) testGit() {
-	err := s.repository.OpenOrClone(filepath.Join(s.env.workDirectoryPath(), repositorySubdir))
+	err := s.repository.OpenOrClone(filepath.Join(s.env.WorkDirectoryPath(), repositorySubdir))
 	if err != nil {
 		s.error("%v", err)
 		return

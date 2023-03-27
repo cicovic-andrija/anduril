@@ -28,14 +28,14 @@ const (
 	MarkdownHTMLConverter = "pandoc"
 )
 
-type environment struct {
+type Environment struct {
 	wd    string
 	pid   int
 	initd bool
 }
 
-func readEnvironment() (*environment, error) {
-	env := &environment{
+func ReadEnvironment() (*Environment, error) {
+	env := &Environment{
 		initd: false,
 	}
 
@@ -54,20 +54,19 @@ func readEnvironment() (*environment, error) {
 		return nil, err
 	}
 
-	if exists, _ := util.DirectoryExists(env.dataDirectoryPath()); !exists {
-		return env, fmt.Errorf("failed to stat dir: %s", env.dataDirectoryPath())
+	if exists, _ := util.DirectoryExists(env.DataDirectoryPath()); !exists {
+		return env, fmt.Errorf("directory not found: %s", env.DataDirectoryPath())
 	}
 
 	return env, nil
 }
 
-func prepareEnvironment(env *environment) error {
+func PrepareEnvironment(env *Environment) error {
 	for _, directory := range []string{
-		env.workDirectoryPath(),
-		filepath.Join(env.workDirectoryPath(), repositorySubdir),
-		filepath.Join(env.workDirectoryPath(), compiledSubdir),
-		filepath.Join(env.workDirectoryPath(), staticSubdir),
-		env.logsDirectoryPath(),
+		env.WorkDirectoryPath(),
+		filepath.Join(env.WorkDirectoryPath(), repositorySubdir),
+		filepath.Join(env.WorkDirectoryPath(), compiledSubdir),
+		env.LogsDirectoryPath(),
 	} {
 		if err := util.MkdirIfNotExists(directory); err != nil {
 			return err
@@ -78,22 +77,22 @@ func prepareEnvironment(env *environment) error {
 	return nil
 }
 
-func (env *environment) dataDirectoryPath() string {
+func (env *Environment) DataDirectoryPath() string {
 	return filepath.Join(env.wd, "data")
 }
 
-func (env *environment) workDirectoryPath() string {
+func (env *Environment) WorkDirectoryPath() string {
 	return filepath.Join(env.wd, "work")
 }
 
-func (env *environment) logsDirectoryPath() string {
+func (env *Environment) LogsDirectoryPath() string {
 	return filepath.Join(env.wd, "logs")
 }
 
-func (env *environment) configPath() string {
-	return filepath.Join(env.wd, "anduril-config.json")
+func (env *Environment) ConfigPath() string {
+	return filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
 }
 
-func (env *environment) primaryLogPath() string {
-	return filepath.Join(env.logsDirectoryPath(), "anduril.log")
+func (env *Environment) PrimaryLogPath() string {
+	return filepath.Join(env.LogsDirectoryPath(), "anduril.log")
 }

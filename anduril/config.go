@@ -19,7 +19,7 @@ type RepositoryConfig struct {
 	ContentRelativePath string `json:"content_relative_path"`
 }
 
-func readConfig(path string) (*Config, error) {
+func ReadConfig(path string) (*Config, error) {
 	config := &Config{}
 	if configFile, err := util.OpenFile(path); err != nil {
 		return nil, err
