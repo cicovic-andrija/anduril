@@ -64,9 +64,9 @@ func ReadEnvironment() (*Environment, error) {
 func PrepareEnvironment(env *Environment) error {
 	for _, directory := range []string{
 		env.WorkDirectoryPath(),
+		env.LogsDirectoryPath(),
 		filepath.Join(env.WorkDirectoryPath(), repositorySubdir),
 		filepath.Join(env.WorkDirectoryPath(), compiledSubdir),
-		env.LogsDirectoryPath(),
 	} {
 		if err := util.MkdirIfNotExists(directory); err != nil {
 			return err

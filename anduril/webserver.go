@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/cicovic-andrija/go-util"
@@ -18,6 +19,8 @@ type WebServer struct {
 	repository     *RepositoryProcessor
 	latestRevision *Revision
 	executor       *Executor
+	taskWaitGroup  *sync.WaitGroup
+	stopChannels   []chan struct{}
 	logger         *util.FileLog
 	startedAt      time.Time
 }
@@ -40,17 +43,20 @@ func NewWebServer(env *Environment, config *Config) (server *WebServer, err erro
 	}
 
 	webServer := &WebServer{
-		env:         env,
-		httpsServer: httpsServer,
-		logger:      logger,
+		env:           env,
+		httpsServer:   httpsServer,
+		taskWaitGroup: &sync.WaitGroup{},
+		stopChannels:  make([]chan struct{}, 0),
+		logger:        logger,
 	}
 
+	// Explicitly set repo to nil: struct not initialized.
 	webServer.repository = &RepositoryProcessor{
 		RepositoryConfig: config.Repository,
-		trace:            webServer.generateTraceCallback(RepositoryProcessorTag),
 		repo:             nil,
 	}
 
+	// Explicitly set to nil: not initialized.
 	webServer.latestRevision = nil
 
 	webServer.executor = &Executor{
@@ -67,27 +73,8 @@ func (s *WebServer) ListenAndServe() {
 	s.log("primary log location: %s", s.logger.LogPath())
 	s.log("HTTPS server log location: %s", s.httpsServer.GetLogPath())
 	s.log("HTTPS requests log location: %s", s.httpsServer.GetRequestsLogPath())
-
-	s.testGit()
-
+	s.startPeriodicTasks()
 	s.listenAndServeInternal()
-}
-
-func (s *WebServer) testGit() {
-	err := s.repository.OpenOrClone(filepath.Join(s.env.WorkDirectoryPath(), repositorySubdir))
-	if err != nil {
-		s.error("%v", err)
-		return
-	}
-
-	revision := &Revision{
-		Articles:      make(map[string]*Article),
-		Tags:          make(map[string][]*Article),
-		ContainerPath: s.repository.ContentRoot(),
-		Hash:          s.repository.LatestCommitShortHash(),
-	}
-
-	s.processRevision(revision)
 }
 
 func (s *WebServer) listenAndServeInternal() {
@@ -111,6 +98,30 @@ func (s *WebServer) listenAndServeInternal() {
 			os.Exit(0)
 		case httpsServerError := <-httpsErrorChannel:
 			panic(s.error("HTTPS server stopped unexpectedly:  %v", httpsServerError))
+		}
+	}
+}
+
+func (s *WebServer) startPeriodicTasks() {
+	s.taskWaitGroup.Add(1)
+	stop := make(chan struct{})
+	go s.genericPeriodicTask(s.checkForNewRevision, 10*time.Second, stop, RepositoryProcessorTag)
+}
+
+func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
+	s.log("starting timer task %s", tag)
+	trace := s.generateTraceCallback(tag)
+	ticker := time.NewTicker(period)
+	for {
+		select {
+		case <-stop:
+			s.taskWaitGroup.Done()
+			s.log("timer task %s stopped", tag)
+		case <-ticker.C:
+			err := f(trace, v...)
+			if err != nil {
+				s.error("timer task %s failed with error: %v", tag, err)
+			}
 		}
 	}
 }

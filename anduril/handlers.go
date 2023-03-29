@@ -10,11 +10,11 @@ func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 	s.log("RootHandler")
 }
 
-func (s *WebServer) TopicRootHandler(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
 	s.log("TopicRootHandler")
 }
 
-func (s *WebServer) TopicHandler(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) TagHandler(w http.ResponseWriter, r *http.Request) {
 	s.log("TopicHandler")
 }
 
@@ -29,18 +29,18 @@ func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) 
 func (s *WebServer) registerHandlers() {
 	s.httpsServer.Handle(
 		"/",
-		http.HandlerFunc(s.RootHandler),
+		http.RedirectHandler("/articles", http.StatusMovedPermanently),
 	)
 
 	s.httpsServer.Handle(
 		"/topics",
-		http.HandlerFunc(s.TopicRootHandler),
+		http.HandlerFunc(s.TagRootHandler),
 	)
 
 	s.httpsServer.Handle(
 		"/topics/",
 		https.Adapt(
-			http.HandlerFunc(s.TopicHandler),
+			http.HandlerFunc(s.TagHandler),
 			https.RedirectRootToParentTree,
 		),
 	)
