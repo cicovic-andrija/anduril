@@ -59,13 +59,18 @@ func (r *RepositoryProcessor) ValidateState() error {
 	if err != nil {
 		return fmt.Errorf("failed to obtain a reference to the current commit: %v", err)
 	}
-	r.trace("current checked out commit hash is %s", current.Hash())
 
 	branchRef, err := r.repo.Reference(plumbing.NewBranchReferenceName(r.Branch), false /* resolved */)
 	if err != nil {
 		return fmt.Errorf("failed to obtain a reference to the %q branch: %v", r.Branch, err)
 	}
-	r.trace("latest %q branch commit hash is %s", r.Branch, branchRef.Hash())
+
+	r.trace(
+		"current checked out commit hash is %s, and latest %q branch commit hash is %s",
+		current.Hash(),
+		r.Branch,
+		branchRef.Hash(),
+	)
 
 	if current.Hash().String() != branchRef.Hash().String() {
 		return fmt.Errorf("current commit is not at the tip of the expected branch: %q", r.Branch)
@@ -80,7 +85,7 @@ func (r *RepositoryProcessor) Root() string {
 }
 
 func (r *RepositoryProcessor) ContentRoot() string {
-	return filepath.Join(r.repoRoot, r.ContentRelativePath)
+	return filepath.Join(r.repoRoot, r.RelativeContentPath)
 }
 
 func (r *RepositoryProcessor) LatestCommitShortHash() string {

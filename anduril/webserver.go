@@ -18,6 +18,7 @@ type WebServer struct {
 	httpsServer    *https.HTTPSServer
 	repository     *RepositoryProcessor
 	latestRevision *Revision
+	revisionLock   *sync.RWMutex
 	executor       *Executor
 	taskWaitGroup  *sync.WaitGroup
 	stopChannels   []chan struct{}
@@ -58,6 +59,7 @@ func NewWebServer(env *Environment, config *Config) (server *WebServer, err erro
 
 	// Explicitly set to nil: not initialized.
 	webServer.latestRevision = nil
+	webServer.revisionLock = &sync.RWMutex{}
 
 	webServer.executor = &Executor{
 		trace: webServer.generateTraceCallback(ExecutorTag),
@@ -105,7 +107,7 @@ func (s *WebServer) listenAndServeInternal() {
 func (s *WebServer) startPeriodicTasks() {
 	s.taskWaitGroup.Add(1)
 	stop := make(chan struct{})
-	go s.genericPeriodicTask(s.checkForNewRevision, 10*time.Second, stop, RepositoryProcessorTag)
+	go s.genericPeriodicTask(s.checkForNewRevision, 1*time.Minute, stop, RepositoryProcessorTag)
 }
 
 func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {

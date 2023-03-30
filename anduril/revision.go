@@ -11,8 +11,18 @@ var (
 	ErrNotFound = errors.New("content not found")
 )
 
-// Revision is a version (identified by Hash) of a set of data files (articles),
-// stored on the file system in ContainerPath.
+// ObjectType represents a type of object within a revision.
+type ObjectType int
+
+// Object types enum.
+const (
+	ArticleObject ObjectType = iota
+	TagObject
+)
+
+// Revision is a version (identified by Hash) of a set of objects,
+// that represent a set of data files (articles) stored on
+// the file system location written in ContainerPath.
 type Revision struct {
 	Articles      map[string]*Article
 	Tags          map[string][]*Article
@@ -20,15 +30,28 @@ type Revision struct {
 	Hash          string
 }
 
-func (r *Revision) FindArticle(key string) *Article {
+func (r *Revision) FindObject(key string, objectType ObjectType) (found bool) {
+	switch objectType {
+	case ArticleObject:
+		_, found = r.Articles[key]
+		return
+	case TagObject:
+		_, found = r.Tags[key]
+		return
+	default:
+		return
+	}
+}
+
+func (r *Revision) GetArticle(key string) *Article {
 	if article, exists := r.Articles[key]; exists {
 		return article
 	}
 	return nil
 }
 
-func (r *Revision) SearchByTag(tag string) []*Article {
-	if articles, exists := r.Tags[tag]; exists {
+func (r *Revision) SearchByTag(key string) []*Article {
+	if articles, exists := r.Tags[key]; exists {
 		return articles
 	}
 	return nil
@@ -52,7 +75,7 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 	}
 
 	if !found {
-		// pull
+		// TODO: pull
 	}
 
 	if found {
@@ -68,7 +91,10 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 		if err != nil {
 			return fmt.Errorf("failed to process new revision %s: %v", revision.Hash, err)
 		}
+
+		s.revisionLock.Lock()
 		s.latestRevision = revision
+		s.revisionLock.Unlock()
 	}
 
 	return nil

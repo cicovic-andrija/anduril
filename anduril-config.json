@@ -18,6 +18,6 @@
         "url": "https://github.com/cicovic-andrija/notes.git",
         "remote": "origin",
         "branch": "master",
-        "content_relative_path": "notes"
+        "relative_content_path": "notes"
     }
 }
