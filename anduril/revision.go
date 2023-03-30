@@ -20,7 +20,7 @@ const (
 	TagObject
 )
 
-// Revision is a version (identified by Hash) of a set of objects,
+// Revision is a version (identified by Hash) of a set of objects
 // that represent a set of data files (articles) stored on
 // the file system location written in ContainerPath.
 type Revision struct {

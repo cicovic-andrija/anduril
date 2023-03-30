@@ -20,23 +20,29 @@ func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebServer) ArticleRootHandler(w http.ResponseWriter, r *http.Request) {
-	s.log("ArticleRootHandler")
+	s.PageNotFoundHandler(w, r)
 }
 
 func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request) {
-	s.log("ArticleHandler")
+	key := r.URL.Path
+	article := s.latestRevision.GetArticle(key)
+	if article == nil {
+		panic(s.error("impossible server state: WebServer.ArticleHandlerLocked: article must exist but not found: key: %s", key))
+	}
+
+	s.renderPage(w, article.VersionedHTMLName(s.latestRevision.Hash))
 }
 
 func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
-	s.log("TagRootHandler")
+	s.PageNotFoundHandler(w, r)
 }
 
 func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
-	s.log("TagHandler")
+	s.PageNotFoundHandler(w, r)
 }
 
 func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	s.log("PageNotFoundHandler")
+	s.log("Not Yet Implemented")
 }
 
 // FindAndLock is an https.Adapter generator used to make adapters for requests

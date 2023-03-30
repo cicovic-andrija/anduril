@@ -40,7 +40,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
 			filepath.Join(revision.ContainerPath, article.File),
-			filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir, fmt.Sprintf("%s_%s.html", article.Key, revision.Hash)),
+			filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir, article.VersionedHTMLName(revision.Hash)),
 		)
 		if err != nil {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)
@@ -91,29 +91,33 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 	return nil
 }
 
-func (md *Article) Normalize() (err error) {
-	if md.Title == "" {
+func (a *Article) Normalize() (err error) {
+	if a.Title == "" {
 		err = errors.New("empty title")
 		return
 	}
 
-	if md.Created != "" {
-		md.CreatedTime, err = time.Parse(time.RFC3339, md.Created)
+	if a.Created != "" {
+		a.CreatedTime, err = time.Parse(time.RFC3339, a.Created)
 		if err != nil {
 			err = fmt.Errorf("failed to parse 'created' timestamp: %v", err)
 			return
 		}
 	}
 
-	if md.Modified != "" {
-		md.ModifiedTime, err = time.Parse(time.RFC3339, md.Modified)
+	if a.Modified != "" {
+		a.ModifiedTime, err = time.Parse(time.RFC3339, a.Modified)
 		if err != nil {
 			err = fmt.Errorf("failed to parse 'modified' timestamp: %v", err)
 			return
 		}
 	}
 
-	md.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(md.File, ".md")), " ", "-")
+	a.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(a.File, ".md")), " ", "-")
 
 	return nil
+}
+
+func (a *Article) VersionedHTMLName(versionHash string) string {
+	return fmt.Sprintf("%s_%s.html", a.Key, versionHash)
 }
