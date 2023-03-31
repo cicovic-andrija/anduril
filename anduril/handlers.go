@@ -30,7 +30,10 @@ func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request)
 		panic(s.error("impossible server state: WebServer.ArticleHandlerLocked: article must exist but not found: key: %s", key))
 	}
 
-	s.renderPage(w, article.VersionedHTMLName(s.latestRevision.Hash))
+	err := s.renderArticle(w, article.VersionedHTMLTemplate(s.latestRevision.Hash))
+	if err != nil {
+		s.warn("failed to render article: %v", err)
+	}
 }
 
 func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {

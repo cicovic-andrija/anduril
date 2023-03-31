@@ -96,3 +96,11 @@ func (env *Environment) ConfigPath() string {
 func (env *Environment) PrimaryLogPath() string {
 	return filepath.Join(env.LogsDirectoryPath(), "anduril.log")
 }
+
+func (env *Environment) TemplatePath(templateName string) string {
+	return filepath.Join(env.DataDirectoryPath(), templatesSubdir, templateName)
+}
+
+func (env *Environment) CompiledTemplatePath(templateName string) string {
+	return filepath.Join(env.WorkDirectoryPath(), compiledSubdir, templateName)
+}

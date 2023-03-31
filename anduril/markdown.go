@@ -40,7 +40,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
 			filepath.Join(revision.ContainerPath, article.File),
-			filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir, article.VersionedHTMLName(revision.Hash)),
+			filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir, article.VersionedHTMLTemplate(revision.Hash)),
 		)
 		if err != nil {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)
@@ -118,6 +118,6 @@ func (a *Article) Normalize() (err error) {
 	return nil
 }
 
-func (a *Article) VersionedHTMLName(versionHash string) string {
+func (a *Article) VersionedHTMLTemplate(versionHash string) string {
 	return fmt.Sprintf("%s_%s.html", a.Key, versionHash)
 }
