@@ -13,7 +13,45 @@
 </head>
 
 <body>
-    {{ template "content" . }}
+    <main>
+        <div class="container">
+            <div class="row">
+                <!-- Empty space to the left on large+ viewports -->
+                <div class="col-lg-1 p-0"></div>
+
+                <!-- Article content -->
+                <div class="col-lg">
+                    {{ template "content" . }}
+                </div>
+
+                <!-- Tag sidebar (list of tags) on the right -->
+                <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
+                    <a href="/tags"
+                        class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
+                        <span class="fs-5 fw-semibold">Tags</span>
+                    </a>
+                    <div class="list-group list-group-flush border-bottom scrollarea">
+                        <a href="#" class="list-group-item list-group-item-action active py-3 lh-tight"
+                            aria-current="true">
+                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                <strong class="mb-1">windows</strong>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="list-group list-group-flush border-bottom scrollarea">
+                        <a href="#" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="false">
+                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                <strong class="mb-1">diving</strong>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Empty space to the right on large+ viewports -->
+                <div class="col-lg-1 p-0"></div>
+            </div>
+        </div>
+    </main>
 
     <!-- FRONTEND LIBRARY DEPENDENT -->
     <script src="/static/bootstrap.bundle.min.js"></script>
