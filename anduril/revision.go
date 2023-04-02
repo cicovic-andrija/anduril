@@ -26,6 +26,7 @@ const (
 type Revision struct {
 	Articles      map[string]*Article
 	Tags          map[string][]*Article
+	SortedTags    []string
 	ContainerPath string
 	Hash          string
 }
@@ -82,6 +83,7 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 		revision := &Revision{
 			Articles:      make(map[string]*Article),
 			Tags:          make(map[string][]*Article),
+			SortedTags:    make([]string, 0),
 			ContainerPath: s.repository.ContentRoot(),
 			Hash:          s.repository.LatestCommitShortHash(),
 		}

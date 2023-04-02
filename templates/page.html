@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Not Yet Implemented</title>
+    <title>{{ .Title }}</title>
     <link href="/static/stylesheet.css" rel="stylesheet">
 
     <!-- FRONTEND LIBRARY DEPENDENT -->
@@ -31,26 +31,31 @@
                         <span class="fs-5 fw-semibold">Tags</span>
                     </a>
                     <div class="list-group list-group-flush border-bottom scrollarea">
-                        <a href="#" class="list-group-item list-group-item-action active py-3 lh-tight"
+
+                        {{ range .HighlightedTags }}
+                        <a href="/tags/{{ . }}" class="list-group-item list-group-item-action active py-3 lh-tight"
                             aria-current="true">
                             <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1">windows</strong>
+                                <strong class="mb-1">{{ . }}</strong>
                             </div>
                         </a>
-                    </div>
-                    <div class="list-group list-group-flush border-bottom scrollarea">
-                        <a href="#" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="false">
-                            <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1">diving</strong>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+                        {{ end }}
 
-                <!-- Empty space to the right on large+ viewports -->
-                <div class="col-lg-1 p-0"></div>
+                        {{ range .Tags }}
+                        {{ if not ($.IsHighlighted .) }}
+                        <a href="/tags/{{ . }}" class="list-group-item list-group-item-action py-3 lh-tight">
+                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                <strong class="mb-1">{{ . }}</strong>
+                            </div>
+                        </a>
+                        {{ end }}
+                        {{ end }}
+                    </div>
+
+                    <!-- Empty space to the right on large+ viewports -->
+                    <div class="col-lg-1 p-0"></div>
+                </div>
             </div>
-        </div>
     </main>
 
     <!-- FRONTEND LIBRARY DEPENDENT -->

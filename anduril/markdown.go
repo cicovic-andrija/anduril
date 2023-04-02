@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -36,6 +37,11 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	); err != nil {
 		return fmt.Errorf("failed to process data batch: %v", err)
 	}
+
+	for tag, _ := range revision.Tags {
+		revision.SortedTags = append(revision.SortedTags, tag)
+	}
+	sort.Strings(revision.SortedTags)
 
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
