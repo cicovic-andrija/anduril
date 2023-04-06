@@ -28,33 +28,39 @@
                 <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
                     <a href="/tags"
                         class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
-                        <span class="fs-5 fw-semibold">Tags</span>
+                        <span class="fs-4 fw-bold">Tags</span>
                     </a>
                     <div class="list-group list-group-flush border-bottom scrollarea">
-
-                        {{ range .HighlightedTags }}
-                        <a href="/tags/{{ . }}" class="list-group-item list-group-item-action active py-3 lh-tight"
-                            aria-current="true">
-                            <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1">{{ . }}</strong>
-                            </div>
-                        </a>
-                        {{ end }}
-
                         {{ range .Tags }}
-                        {{ if not ($.IsHighlighted .) }}
                         <a href="/tags/{{ . }}" class="list-group-item list-group-item-action py-3 lh-tight">
                             <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1">{{ . }}</strong>
+                                <strong class="mb-1{{ if $.IsHighlighted . }} text-primary {{ else }} text-secondary {{ end }}">
+                                    {{ . }}
+                                </strong>
                             </div>
                         </a>
                         {{ end }}
-                        {{ end }}
                     </div>
-
-                    <!-- Empty space to the right on large+ viewports -->
-                    <div class="col-lg-1 p-0"></div>
                 </div>
+
+                <!-- Empty space to the right on large+ viewports -->
+                <div class="col-lg-1 p-0"></div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row pt-3">
+                <div class="col-lg-1 p-0"></div>
+                <div class="col-lg">
+                    <hr class="mb-1">
+                    <p class="text-start text-muted">
+                        <!-- It is important for the <small> element to be in the same
+                            line as the closing </a> tag, to avoid trailing underlined whitespace -->
+                        <a href="/articles"><small>Articles</small></a>
+                        <small>&nbsp;|&nbsp;</small>
+                        <a href="#"><small>Top</small></a>
+                    </p>
+                </div>
+                <div class="col-lg-1 p-0"></div>
             </div>
     </main>
 
