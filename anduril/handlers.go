@@ -22,7 +22,10 @@ func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebServer) ArticleRootHandler(w http.ResponseWriter, r *http.Request) {
-	s.PageNotFoundHandler(w, r)
+	err := s.renderListOfAllArticles(w, s.latestRevision)
+	if err != nil {
+		s.warn("failed to render list of all articles: %v", err)
+	}
 }
 
 func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +34,6 @@ func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request)
 	if article == nil {
 		panic(s.error("impossible server state: WebServer.ArticleHandlerLocked: article must exist but not found: key: %s", key))
 	}
-
 	err := s.renderArticle(w, article, s.latestRevision)
 	if err != nil {
 		s.warn("failed to render article: %v", err)
@@ -39,15 +41,26 @@ func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
-	s.PageNotFoundHandler(w, r)
+	err := s.renderListOfAllArticlesAndTags(w, s.latestRevision)
+	if err != nil {
+		s.warn("failed to render list of all articles and tags: %v", err)
+	}
 }
 
 func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
-	s.PageNotFoundHandler(w, r)
+	tag := r.URL.Path
+	articles := s.latestRevision.SearchByTag(tag)
+	if articles == nil {
+		panic(s.error("impossible server state: WebServer.TagHandlerLocked: articles must exist for tag but not found: tag: %s", tag))
+	}
+	err := s.renderListOfAllArticlesForTag(w, tag, articles, s.latestRevision)
+	if err != nil {
+		s.warn("failed to render list of all articles for tag %q: %v", tag, err)
+	}
 }
 
 func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	s.log("Not Yet Implemented")
+	s.renderPage(w, &Page{Title: "Not Found", Is404: true})
 }
 
 // FindAndLock is an https.Adapter generator used to make adapters for requests

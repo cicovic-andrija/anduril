@@ -9,9 +9,10 @@ import (
 const (
 	// Top-level template for rendering HTML pages.
 	PageTemplate = "page.html"
-
-	// String format for dynamic templates that render unique HTML page content.
-	ContentTemplateText = "{{ template \"%s\" . }}"
+	// Dynamic article content template name.
+	ArticleContentTextTemplate = "articleContent"
+	// String format for dynamic templates that render article content.
+	ArticleContentTextTemplateFmt = "{{ template \"%s\" . }}"
 )
 
 type Page struct {
@@ -19,19 +20,8 @@ type Page struct {
 	Articles        []*Article
 	Tags            []string
 	HighlightedTags []string
+	Is404           bool
 	contentTemplate string
-}
-
-func NewArticlePage(article *Article, revision *Revision) *Page {
-	page := &Page{
-		Title:           article.Title,
-		Articles:        []*Article{article},
-		HighlightedTags: append([]string{}, article.Tags...),
-		Tags:            revision.SortedTags,
-		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
-	}
-
-	return page
 }
 
 func (p *Page) IsHighlighted(tag string) (highlighted bool) {
@@ -43,32 +33,60 @@ func (p *Page) IsHighlighted(tag string) (highlighted bool) {
 	return false
 }
 
-func (p *Page) Layout() string {
-	if len(p.Articles) == 0 {
-		if len(p.HighlightedTags) == 1 {
-			return "ArticleListWithTags"
-		} else {
-			return "NoArticleWithTags"
-		}
-	} else if len(p.Articles) == 1 {
-		return "ArticleWithTags"
-	} else {
-		return "ArticleListNoTags"
-	}
+func (p *Page) ShowArticleListInsteadOfContent() bool {
+	return (len(p.Articles) > 1) || (len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.contentTemplate == "")
+}
+
+func (p *Page) IsTagListVisible() bool {
+	return len(p.Tags) > 0
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
-	return s.renderPage(w, NewArticlePage(article, revision))
+	return s.renderPage(w, &Page{
+		Title:           article.Title,
+		Articles:        []*Article{article},
+		HighlightedTags: append([]string{}, article.Tags...),
+		Tags:            revision.SortedTags,
+		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
+	})
+}
+
+func (s *WebServer) renderListOfAllArticles(w io.Writer, revision *Revision) error {
+	return s.renderPage(w, &Page{
+		Title:    "Articles",
+		Articles: revision.SortedArticles,
+	})
+}
+
+func (s *WebServer) renderListOfAllArticlesForTag(w io.Writer, tag string, articles []*Article, revision *Revision) error {
+	return s.renderPage(w, &Page{
+		Title:           tag,
+		Articles:        articles,
+		HighlightedTags: []string{tag},
+		Tags:            revision.SortedTags,
+	})
+}
+
+func (s *WebServer) renderListOfAllArticlesAndTags(w io.Writer, revision *Revision) error {
+	return s.renderPage(w, &Page{
+		Title:    "Tags",
+		Articles: revision.SortedArticles,
+		Tags:     revision.SortedTags,
+	})
 }
 
 func (s *WebServer) renderPage(w io.Writer, page *Page) error {
-	t, err := template.ParseFiles(
-		s.env.TemplatePath(PageTemplate),
-		s.env.CompiledTemplatePath(page.contentTemplate),
-	)
+	t, err := template.ParseFiles(s.env.TemplatePath(PageTemplate))
+	if err == nil {
+		if page.contentTemplate != "" {
+			t.New(ArticleContentTextTemplate).Parse(fmt.Sprintf(ArticleContentTextTemplateFmt, page.contentTemplate))
+			_, err = t.ParseFiles(s.env.CompiledTemplatePath(page.contentTemplate))
+		} else {
+			t.New(ArticleContentTextTemplate).Parse("")
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("failed to parse one or more template files: %v", err)
 	}
-	t.New("content").Parse(fmt.Sprintf(ContentTemplateText, page.contentTemplate))
 	return t.ExecuteTemplate(w, PageTemplate, page)
 }

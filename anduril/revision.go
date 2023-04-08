@@ -24,11 +24,12 @@ const (
 // that represent a set of data files (articles) stored on
 // the file system location written in ContainerPath.
 type Revision struct {
-	Articles      map[string]*Article
-	Tags          map[string][]*Article
-	SortedTags    []string
-	ContainerPath string
-	Hash          string
+	Articles       map[string]*Article
+	SortedArticles []*Article
+	Tags           map[string][]*Article
+	SortedTags     []string
+	ContainerPath  string
+	Hash           string
 }
 
 func (r *Revision) FindObject(key string, objectType ObjectType) (found bool) {
@@ -81,11 +82,12 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 
 	if found {
 		revision := &Revision{
-			Articles:      make(map[string]*Article),
-			Tags:          make(map[string][]*Article),
-			SortedTags:    make([]string, 0),
-			ContainerPath: s.repository.ContentRoot(),
-			Hash:          s.repository.LatestCommitShortHash(),
+			Articles:       make(map[string]*Article),
+			SortedArticles: make([]*Article, 0),
+			Tags:           make(map[string][]*Article),
+			SortedTags:     make([]string, 0),
+			ContainerPath:  s.repository.ContentRoot(),
+			Hash:           s.repository.LatestCommitShortHash(),
 		}
 		trace("new revision %s found", revision.Hash)
 

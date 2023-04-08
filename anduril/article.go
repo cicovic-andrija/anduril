@@ -16,6 +16,7 @@ import (
 
 type Article struct {
 	Title        string    `yaml:"title"`
+	Subtitle     string    `yaml:"-"`
 	Tags         []string  `yaml:"tags"`
 	Created      string    `yaml:"created"`
 	CreatedTime  time.Time `yaml:"-"`
@@ -53,6 +54,10 @@ func (s *WebServer) processRevision(revision *Revision) error {
 		}
 	}
 
+	sort.Slice(revision.SortedArticles, func(i, j int) bool {
+		return revision.SortedArticles[i].Title < revision.SortedArticles[j].Title
+	})
+
 	return nil
 }
 
@@ -77,6 +82,9 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 
 	// Cache article by key.
 	revision.Articles[article.Key] = article
+
+	// Note: will be sorted later.
+	revision.SortedArticles = append(revision.SortedArticles, article)
 
 	// Cache tags.
 	for _, tag := range article.Tags {
@@ -120,6 +128,7 @@ func (a *Article) Normalize() (err error) {
 	}
 
 	a.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(a.File, ".md")), " ", "-")
+	a.Subtitle = fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
 
 	return nil
 }

@@ -9,7 +9,6 @@
 
     <!-- FRONTEND LIBRARY DEPENDENT (BOOTSTRAP) -->
     <link href="/static/bootstrap.min.css" rel="stylesheet">
-    <!-- FRONTEND LIBRARY DEPENDENT -->
 </head>
 
 <body onload="appendCopyButtons()">
@@ -17,7 +16,7 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
         <div class="container">
             <!-- pb-2 aligns the brand with the other items in the navbar -->
-            <a class="navbar-brand pb-2" href="/">anduril</a>
+            <a class="navbar-brand pb-2" href="/">Andúril</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -41,11 +40,31 @@
                 <!-- Empty space to the left on large+ viewports -->
                 <div class="col-lg-1 p-0"></div>
 
-                <!-- Article content -->
+                {{ if .Is404 }}
                 <div class="col-lg">
-                    {{ template "content" . }}
+                    <h3 class="text-center">Page Not Found (404)</h3>
+                    <p class="text-center text-muted">
+                        The page you requested does not exist.
+                    </p>
                 </div>
 
+                {{ else }}
+                <!-- Article list OR content of a specific article -->
+                <div class="col-lg">
+                {{ if .ShowArticleListInsteadOfContent }}
+                <h1>Articles</h1>
+                {{ range .Articles }}
+                <div>
+                    <h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h3>
+                    <h6 class="text-secondary">{{ .Subtitle }}</h6>
+                </div>
+                {{ end }}
+                {{ else }}
+                {{ template "articleContent" . }}
+                {{ end }}
+                </div>
+
+                {{ if .IsTagListVisible }}
                 <!-- Tag sidebar (list of tags) on the right -->
                 <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
                     <a href="/tags"
@@ -64,6 +83,9 @@
                         {{ end }}
                     </div>
                 </div>
+                {{ end }}
+
+                {{ end }}
 
                 <!-- Empty space to the right on large+ viewports -->
                 <div class="col-lg-1 p-0"></div>
@@ -91,7 +113,6 @@
 
     <!-- FRONTEND LIBRARY DEPENDENT (BOOTSTRAP) -->
     <script src="/static/bootstrap.bundle.min.js"></script>
-    <!-- FRONTEND LIBRARY DEPENDENT -->
 </body>
 
 <script>

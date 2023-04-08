@@ -107,7 +107,7 @@ func (s *WebServer) listenAndServeInternal() {
 func (s *WebServer) startPeriodicTasks() {
 	s.taskWaitGroup.Add(1)
 	stop := make(chan struct{})
-	go s.genericPeriodicTask(s.checkForNewRevision, 1*time.Minute, stop, RepositoryProcessorTag)
+	go s.genericPeriodicTask(s.checkForNewRevision, 10*time.Second, stop, RepositoryProcessorTag)
 }
 
 func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
