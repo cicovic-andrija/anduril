@@ -7,15 +7,37 @@
     <title>{{ .Title }}</title>
     <link href="/static/stylesheet.css" rel="stylesheet">
 
-    <!-- FRONTEND LIBRARY DEPENDENT -->
+    <!-- FRONTEND LIBRARY DEPENDENT (BOOTSTRAP) -->
     <link href="/static/bootstrap.min.css" rel="stylesheet">
     <!-- FRONTEND LIBRARY DEPENDENT -->
 </head>
 
-<body>
+<body onload="appendCopyButtons()">
+    <!-- HEADER -->
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+        <div class="container">
+            <!-- pb-2 aligns the brand with the other items in the navbar -->
+            <a class="navbar-brand pb-2" href="/">anduril</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/articles">Articles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tags">Tags</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
     <main>
         <div class="container">
-            <div class="row">
+            <div class="row pt-3">
                 <!-- Empty space to the left on large+ viewports -->
                 <div class="col-lg-1 p-0"></div>
 
@@ -28,7 +50,7 @@
                 <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
                     <a href="/tags"
                         class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
-                        <span class="fs-4 fw-bold">Tags</span>
+                        <span class="fs-5">Tags</span>
                     </a>
                     <div class="list-group list-group-flush border-bottom scrollarea">
                         {{ range .Tags }}
@@ -46,27 +68,71 @@
                 <!-- Empty space to the right on large+ viewports -->
                 <div class="col-lg-1 p-0"></div>
             </div>
-
-            <!-- Footer -->
-            <div class="row pt-3">
-                <div class="col-lg-1 p-0"></div>
-                <div class="col-lg">
-                    <hr class="mb-1">
-                    <p class="text-start text-muted">
-                        <!-- It is important for the <small> element to be in the same
-                            line as the closing </a> tag, to avoid trailing underlined whitespace -->
-                        <a href="/articles"><small>Articles</small></a>
-                        <small>&nbsp;|&nbsp;</small>
-                        <a href="#"><small>Top</small></a>
-                    </p>
-                </div>
-                <div class="col-lg-1 p-0"></div>
-            </div>
+        </div>
     </main>
 
-    <!-- FRONTEND LIBRARY DEPENDENT -->
+    <!-- FOOTER -->
+    <div class="container">
+        <div class="row pt-3">
+            <!-- Empty space to the left on large+ viewports -->
+            <div class="col-lg-1 p-0"></div>
+
+            <div class="col-lg">
+                <hr class="mb-1">
+                <p class="text-start text-muted">
+                    <a href="#"><small>Top</small></a>
+                </p>
+            </div>
+
+            <!-- Empty space to the right on large+ viewports -->
+            <div class="col-lg-1 p-0"></div>
+        </div>
+    </div>
+
+    <!-- FRONTEND LIBRARY DEPENDENT (BOOTSTRAP) -->
     <script src="/static/bootstrap.bundle.min.js"></script>
     <!-- FRONTEND LIBRARY DEPENDENT -->
 </body>
+
+<script>
+    function appendCopyButtons() {
+        const codeBlocks = document.querySelectorAll("pre")
+        codeBlocks.forEach(block => {
+            const copyButton = document.createElement("button")
+            copyButton.setAttribute("type", "button")
+            copyButton.setAttribute("class", "btn btn-light float-end")
+            copyButton.innerHTML = "Copy"
+            copyButton.addEventListener("click", handleCopyClick)
+            block.append(copyButton)
+        })
+    }
+
+    const copyToClipboard = str => {
+        const el = document.createElement("textarea")
+        el.value = str
+        el.setAttribute("readonly", "")
+        el.style.position = "absolute"
+        el.style.left = "-9999px"
+        document.body.appendChild(el)
+        const selected =
+            document.getSelection().rangeCount > 0
+                ? document.getSelection().getRangeAt(0)
+                : false
+        el.select()
+        document.execCommand("copy")
+        document.body.removeChild(el)
+        if (selected) {
+            document.getSelection().removeAllRanges()
+            document.getSelection().addRange(selected)
+        }
+    }
+
+    function handleCopyClick(evt) {
+        const { children } = evt.target.parentElement
+        const { innerText } = Array.from(children)[0]
+        copyToClipboard(innerText)
+        // alert(innerText)
+    }
+</script>
 
 </html>

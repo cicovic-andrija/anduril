@@ -38,7 +38,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 		return fmt.Errorf("failed to process data batch: %v", err)
 	}
 
-	for tag, _ := range revision.Tags {
+	for tag := range revision.Tags {
 		revision.SortedTags = append(revision.SortedTags, tag)
 	}
 	sort.Strings(revision.SortedTags)
