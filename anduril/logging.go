@@ -12,6 +12,7 @@ const (
 	MarkdownProcessorTag   TraceTag = "MarkdownProcessor"
 	RepositoryProcessorTag TraceTag = "RepositoryProcessor"
 	ExecutorTag            TraceTag = "Executor"
+	CleanupTaskTag         TraceTag = "CleanupTask"
 )
 
 func (s *WebServer) log(format string, v ...interface{}) {

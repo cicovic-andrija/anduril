@@ -44,11 +44,9 @@ func NewWebServer(env *Environment, config *Config) (server *WebServer, err erro
 	}
 
 	webServer := &WebServer{
-		env:           env,
-		httpsServer:   httpsServer,
-		taskWaitGroup: &sync.WaitGroup{},
-		stopChannels:  make([]chan struct{}, 0),
-		logger:        logger,
+		env:         env,
+		httpsServer: httpsServer,
+		logger:      logger,
 	}
 
 	// Explicitly set repo to nil: struct not initialized.
@@ -93,6 +91,7 @@ func (s *WebServer) listenAndServeInternal() {
 		select {
 		case <-interruptChannel:
 			s.log("interrupt signal received, shutting down...")
+			s.stopPeriodicTasks()
 			if httpsShutdownError := s.httpsServer.Shutdown(); httpsShutdownError != nil {
 				panic(s.error("server shutdown: error encountered: %v", httpsShutdownError))
 			}
@@ -105,9 +104,23 @@ func (s *WebServer) listenAndServeInternal() {
 }
 
 func (s *WebServer) startPeriodicTasks() {
-	s.taskWaitGroup.Add(1)
-	stop := make(chan struct{})
-	go s.genericPeriodicTask(s.checkForNewRevision, 1*time.Minute, stop, RepositoryProcessorTag)
+	const N = 2
+	s.taskWaitGroup = &sync.WaitGroup{}
+	s.stopChannels = make([]chan struct{}, N)
+	for i := range s.stopChannels {
+		s.stopChannels[i] = make(chan struct{})
+	}
+
+	s.taskWaitGroup.Add(N)
+	go s.genericPeriodicTask(s.checkForNewRevision, 1*time.Minute, s.stopChannels[0], RepositoryProcessorTag)
+	go s.genericPeriodicTask(s.cleanUpCompiledFiles, 10*time.Second, s.stopChannels[1], CleanupTaskTag)
+}
+
+func (s *WebServer) stopPeriodicTasks() {
+	for _, task := range s.stopChannels {
+		close(task)
+	}
+	s.taskWaitGroup.Wait()
 }
 
 func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
@@ -119,6 +132,7 @@ func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) er
 		case <-stop:
 			s.taskWaitGroup.Done()
 			s.log("timer task %s stopped", tag)
+			return
 		case <-ticker.C:
 			err := f(trace, v...)
 			if err != nil {
