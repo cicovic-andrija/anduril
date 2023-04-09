@@ -11,7 +11,7 @@
     <link href="/static/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body onload="appendCopyButtons()">
+<body onload="postProcessHTML()">
     <!-- HEADER -->
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
         <div class="container">
@@ -116,14 +116,32 @@
 </body>
 
 <script>
+    function postProcessHTML() {
+        setBootstrapCSSClasses()
+        appendCopyButtons()
+    }
+
+    function setBootstrapCSSClasses() {
+        const tables = document.querySelectorAll("table")
+        tables.forEach(table => {
+            table.setAttribute("class", "table")
+        })
+
+        const blockquotes = document.querySelectorAll("blockquote")
+        blockquotes.forEach(blockquote => {
+            blockquote.setAttribute("class", "text-secondary fst-italic")
+        })
+    }
+
     function appendCopyButtons() {
-        const codeBlocks = document.querySelectorAll("pre")
-        codeBlocks.forEach(block => {
+        const preBlocks = document.querySelectorAll("pre")
+        preBlocks.forEach(block => {
             const copyButton = document.createElement("button")
             copyButton.setAttribute("type", "button")
-            copyButton.setAttribute("class", "btn btn-light float-end")
+            copyButton.setAttribute("class", "btn btn-primary float-end")
             copyButton.innerHTML = "Copy"
             copyButton.addEventListener("click", handleCopyClick)
+            block.setAttribute("class", "font-monospace bg-light")
             block.append(copyButton)
         })
     }
