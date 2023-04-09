@@ -54,6 +54,32 @@ func (r *RepositoryProcessor) OpenOrClone(path string) error {
 	return r.ValidateState()
 }
 
+func (r *RepositoryProcessor) Pull() (new bool, err error) {
+	w, err := r.repo.Worktree()
+	if err != nil {
+		err = fmt.Errorf("pull: failed to obtain worktree: %v", err)
+		return
+	}
+
+	err = w.Pull(&git.PullOptions{RemoteName: r.Remote})
+	switch err {
+	case nil:
+		r.trace("pull: successfully fetched and merged latest changes")
+		new = true
+		err = r.ValidateState()
+		return
+	case git.NoErrAlreadyUpToDate:
+		r.trace("pull: already up-to-date")
+		new = false
+		err = nil
+		return
+	default:
+		new = false
+		err = fmt.Errorf("pull operation failed: %v", err)
+		return
+	}
+}
+
 func (r *RepositoryProcessor) ValidateState() error {
 	current, err := r.repo.Head()
 	if err != nil {

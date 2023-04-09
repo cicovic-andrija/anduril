@@ -22,7 +22,14 @@ func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebServer) ArticleRootHandler(w http.ResponseWriter, r *http.Request) {
-	err := s.renderListOfAllArticles(w, s.latestRevision)
+	revision := DummyRevision
+	if s.latestRevision != nil {
+		s.revisionLock.RLock()
+		defer s.revisionLock.RUnlock()
+		revision = s.latestRevision
+	}
+
+	err := s.renderListOfAllArticles(w, revision)
 	if err != nil {
 		s.warn("failed to render list of all articles: %v", err)
 	}
@@ -41,7 +48,14 @@ func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
-	err := s.renderListOfAllArticlesAndTags(w, s.latestRevision)
+	revision := DummyRevision
+	if s.latestRevision != nil {
+		s.revisionLock.RLock()
+		defer s.revisionLock.RUnlock()
+		revision = s.latestRevision
+	}
+
+	err := s.renderListOfAllArticlesAndTags(w, revision)
 	if err != nil {
 		s.warn("failed to render list of all articles and tags: %v", err)
 	}
@@ -60,6 +74,7 @@ func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 	s.renderPage(w, &Page{Title: "Not Found", Is404: true})
 }
 

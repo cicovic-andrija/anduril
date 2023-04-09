@@ -6,11 +6,6 @@ import (
 	"path/filepath"
 )
 
-// Named errors.
-var (
-	ErrNotFound = errors.New("content not found")
-)
-
 // ObjectType represents a type of object within a revision.
 type ObjectType int
 
@@ -19,6 +14,10 @@ const (
 	ArticleObject ObjectType = iota
 	TagObject
 )
+
+var ErrNotFound = errors.New("content not found")
+
+var DummyRevision = &Revision{}
 
 // Revision is a version (identified by Hash) of a set of objects
 // that represent a set of data files (articles) stored on
@@ -76,8 +75,12 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 		found = true
 	}
 
-	if !found {
-		// TODO: pull
+	if !found && s.repository.repo != nil {
+		new, err := s.repository.Pull()
+		if err != nil {
+			return err
+		}
+		found = new
 	}
 
 	if found {
@@ -89,7 +92,7 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 			ContainerPath:  s.repository.ContentRoot(),
 			Hash:           s.repository.LatestCommitShortHash(),
 		}
-		trace("new revision %s found", revision.Hash)
+		trace("new revision found with hash %s", revision.Hash)
 
 		err := s.processRevision(revision)
 		if err != nil {
@@ -99,6 +102,7 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 		s.revisionLock.Lock()
 		s.latestRevision = revision
 		s.revisionLock.Unlock()
+		trace("latest revision updated to %s", revision.Hash)
 	}
 
 	return nil
