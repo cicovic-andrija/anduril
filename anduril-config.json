@@ -9,7 +9,13 @@
         "enable_file_server": true,
         "file_server": {
             "directory": "static",
-            "url_prefix": "/static/"
+            "url_prefix": "/static/",
+            "allowed": [
+                "frontendProcessing.js",
+                "stylesheet.css",
+                "bootstrap.bundle.min.js",
+                "bootstrap.min.css"
+            ]
         },
         "log_requests": true,
         "allow_only_get_requests": true
