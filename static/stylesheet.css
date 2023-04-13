@@ -1,5 +1,4 @@
-body,
-html {
+body, html {
     font-family: Segoe UI, SegoeUI, Helvetica Neue, Helvetica, Arial, sans-serif;
     font-weight: 400;
 }
@@ -10,4 +9,12 @@ main>.container {
 
 h1 {
     border-bottom: 1px solid gainsboro;
+}
+
+h2 {
+    padding-top: 0.5rem;
+}
+
+h3 {
+    padding-top: 0.25rem;
 }
