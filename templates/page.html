@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ .Title }}</title>
     <link href="/static/stylesheet.css" rel="stylesheet">
-
-    <!-- FRONTEND LIBRARY DEPENDENT (BOOTSTRAP) -->
     <link href="/static/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body onload="postProcessHTML()">
-    <!-- HEADER -->
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
         <div class="container">
             <!-- pb-2 aligns the brand with the other items in the navbar -->
@@ -26,8 +22,9 @@
                         <a class="nav-link" href="/tags">Tags</a>
                     </li>
                 </ul>
-                <form>
-                    <input type="search" class="form-control" placeholder="Search...">
+                <form action="/search" method="GET">
+                    <input type="search" name="what" class="form-control" placeholder="Search...">
+                    <input type="submit" hidden />
                 </form>
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
@@ -36,8 +33,6 @@
         </div>
     </nav>
 
-
-    <!-- MAIN -->
     <main>
         <div class="container">
             <div class="row pt-3">
@@ -97,28 +92,23 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
+    <!-- Footer -->
     <div class="container">
         <div class="row pt-3">
             <!-- Empty space to the left on large+ viewports -->
             <div class="col-lg-1 p-0"></div>
-
             <div class="col-lg">
                 <hr class="mb-1">
                 <p class="text-start text-muted">
                     <a href="#"><small>Top</small></a>
                 </p>
             </div>
-
             <!-- Empty space to the right on large+ viewports -->
             <div class="col-lg-1 p-0"></div>
         </div>
     </div>
 
     <script src="/static/frontendProcessing.js"></script>
-
-    <!-- FRONTEND LIBRARY DEPENDENT (BOOTSTRAP) -->
     <script src="/static/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
