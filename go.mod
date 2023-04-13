@@ -3,8 +3,8 @@ module github.com/cicovic-andrija/anduril
 go 1.20
 
 require (
-	github.com/cicovic-andrija/go-util v0.0.0
-	github.com/cicovic-andrija/https v0.0.0
+	github.com/cicovic-andrija/go-util v0.1.0
+	github.com/cicovic-andrija/https v0.1.0
 	github.com/go-git/go-git/v5 v5.6.1
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -28,9 +28,4 @@ require (
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-)
-
-replace (
-	github.com/cicovic-andrija/go-util => ../go-util
-	github.com/cicovic-andrija/https => ../https
 )
