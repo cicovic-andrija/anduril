@@ -7,8 +7,6 @@ import (
 	"github.com/cicovic-andrija/https"
 )
 
-// TODO: Implement a whitelist of static resources.
-
 func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		u := &url.URL{
