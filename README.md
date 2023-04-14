@@ -11,7 +11,7 @@ exit
 
 rsync -v ./deploy/anduril.service root@notes.acicovic.me:/etc/systemd/system/
 rsync -v ./deploy/anduril-config.json root@notes.acicovic.me:/srv/anduril/data/
-rsync -rv static templates ./deploy/anduril-config.json root@notes.acicovic.me:/srv/anduril/data/
+rsync -rv static templates root@notes.acicovic.me:/srv/anduril/data/
 rsync -v ./out/anduril-server root@notes.acicovic.me:/srv/anduril/
 
 ssh root@notes.acicovic.me

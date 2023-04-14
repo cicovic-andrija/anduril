@@ -37,6 +37,16 @@ func (p *Page) ShowArticleListInsteadOfContent() bool {
 	return (len(p.Articles) > 1) || (len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.contentTemplate == "")
 }
 
+func (p *Page) ArticleListHeader() string {
+	if len(p.HighlightedTags) == 1 {
+		return fmt.Sprintf("Articles tagged %q", p.HighlightedTags[0])
+	} else if len(p.Tags) > 0 {
+		return "Tagged articles"
+	} else {
+		return "All articles"
+	}
+}
+
 func (p *Page) IsTagListVisible() bool {
 	return len(p.Tags) > 0
 }

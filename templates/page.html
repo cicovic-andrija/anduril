@@ -51,7 +51,7 @@
                 <!-- Article list OR content of a specific article -->
                 <div class="col-lg">
                 {{ if .ShowArticleListInsteadOfContent }}
-                <h1>Articles</h1>
+                <h1>{{ .ArticleListHeader }}</h1>
                 {{ range .Articles }}
                 <div>
                     <h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h3>
@@ -74,7 +74,7 @@
                         {{ range .Tags }}
                         <a href="/tags/{{ . }}" class="list-group-item list-group-item-action py-3 lh-tight">
                             <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1{{ if $.IsHighlighted . }} text-primary {{ else }} text-secondary {{ end }}">
+                                <strong class="mb-1{{ if $.IsHighlighted . }} {{ if eq . "wip" }} text-danger {{ else }} text-primary {{ end }} {{ else }} text-secondary {{ end }}">
                                     {{ . }}
                                 </strong>
                             </div>
