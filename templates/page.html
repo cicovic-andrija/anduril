@@ -13,8 +13,8 @@
         <div class="container">
             <!-- pb-2 aligns the brand with the other items in the navbar -->
             <a class="navbar-brand pb-2" href="/">Andúril</a>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto">
+            <div class="collapse navbar-collapse pb-2 pb-lg-0" id="navbarContent">
+                <ul class="navbar-nav me-auto pb-2 pb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="/articles">Articles</a>
                     </li>
@@ -23,7 +23,7 @@
                     </li>
                 </ul>
                 <form action="/search" method="GET">
-                    <input type="search" name="what" class="form-control" placeholder="Search...">
+                    <input id="search-input-box" type="search" name="what" class="form-control" placeholder="Search...">
                     <input type="submit" hidden />
                 </form>
             </div>

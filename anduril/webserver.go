@@ -129,15 +129,15 @@ func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) er
 	ticker := time.NewTicker(period)
 	for {
 		select {
-		case <-stop:
-			s.taskWaitGroup.Done()
-			s.log("timer task %s stopped", tag)
-			return
 		case <-ticker.C:
 			err := f(trace, v...)
 			if err != nil {
 				s.error("timer task %s failed with error: %v", tag, err)
 			}
+		case <-stop:
+			s.taskWaitGroup.Done()
+			s.log("timer task %s stopped", tag)
+			return
 		}
 	}
 }

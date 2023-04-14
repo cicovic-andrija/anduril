@@ -1,5 +1,6 @@
 function postProcessHTML() {
     assignBootstrapCSSClasses()
+    registerKeyListener()
     appendCopyButtons()
 }
 
@@ -12,6 +13,14 @@ function assignBootstrapCSSClasses() {
     const blockquotes = document.querySelectorAll("blockquote")
     blockquotes.forEach(blockquote => {
         blockquote.setAttribute("class", "text-secondary fst-italic")
+    })
+}
+
+function registerKeyListener() {
+    document.addEventListener("keyup", (e) => {
+        if (e.key == "/") {
+            document.getElementById("search-input-box").focus()
+        }
     })
 }
 

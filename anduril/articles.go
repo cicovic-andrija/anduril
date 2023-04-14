@@ -134,5 +134,9 @@ func (a *Article) Normalize() (err error) {
 }
 
 func (a *Article) VersionedHTMLTemplate(versionHash string) string {
-	return fmt.Sprintf("%s_%s.html", a.Key, versionHash)
+	return fmt.Sprintf("%s%s", a.Key, VersionedArticleTemplateSuffix(versionHash))
+}
+
+func VersionedArticleTemplateSuffix(versionHash string) string {
+	return fmt.Sprintf("_%s.html", versionHash)
 }

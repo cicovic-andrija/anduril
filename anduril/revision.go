@@ -2,8 +2,6 @@ package anduril
 
 import (
 	"errors"
-	"fmt"
-	"path/filepath"
 )
 
 // ObjectType represents a type of object within a revision.
@@ -55,55 +53,5 @@ func (r *Revision) SearchByTag(key string) []*Article {
 	if articles, exists := r.Tags[key]; exists {
 		return articles
 	}
-	return nil
-}
-
-func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) error {
-	var (
-		found bool
-	)
-
-	trace("checking for new content revision...")
-
-	// First iteration will initialize the repository.
-	if s.repository.repo == nil {
-		s.repository.trace = trace
-		err := s.repository.OpenOrClone(filepath.Join(s.env.WorkDirectoryPath(), repositorySubdir))
-		if err != nil {
-			return err
-		}
-		found = true
-	}
-
-	if !found && s.repository.repo != nil {
-		new, err := s.repository.Pull()
-		if err != nil {
-			return err
-		}
-		found = new
-	}
-
-	if found {
-		revision := &Revision{
-			Articles:       make(map[string]*Article),
-			SortedArticles: make([]*Article, 0),
-			Tags:           make(map[string][]*Article),
-			SortedTags:     make([]string, 0),
-			ContainerPath:  s.repository.ContentRoot(),
-			Hash:           s.repository.LatestCommitShortHash(),
-		}
-		trace("new revision found with hash %s", revision.Hash)
-
-		err := s.processRevision(revision)
-		if err != nil {
-			return fmt.Errorf("failed to process new revision %s: %v", revision.Hash, err)
-		}
-
-		s.revisionLock.Lock()
-		s.latestRevision = revision
-		s.revisionLock.Unlock()
-		trace("latest revision updated to %s", revision.Hash)
-	}
-
 	return nil
 }
