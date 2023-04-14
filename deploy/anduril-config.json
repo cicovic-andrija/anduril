@@ -1,10 +1,10 @@
 {
     "https": {
         "network": {
-            "ip_accept_host": "localhost",
-            "tcp_port": 8080,
-            "tls_cert_path": "certfile.crt",
-            "tls_key_path": "keyfile.key"
+            "ip_accept_host": "any",
+            "tcp_port": 443,
+            "tls_cert_path": "/etc/letsencrypt/live/notes.acicovic.me/fullchain.pem",
+            "tls_key_path": "/etc/letsencrypt/live/notes.acicovic.me/privkey.pem"
         },
         "enable_file_server": true,
         "file_server": {
