@@ -20,3 +20,11 @@ systemctl start anduril.service
 systemctl status anduril.service
 exit
 ```
+
+## Local monitoring
+
+```
+ping notes.acicovic.me
+ssh root@notes.acicovic.me
+tail -f logs/* | cut -d$'\t' -f4 # OR $ tail -f logs/*
+```

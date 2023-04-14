@@ -24,7 +24,7 @@ type Page struct {
 	contentTemplate string
 }
 
-func (p *Page) IsHighlighted(tag string) (highlighted bool) {
+func (p *Page) IsHighlighted(tag string) bool {
 	for _, highlighted := range p.HighlightedTags {
 		if highlighted == tag {
 			return true
@@ -33,8 +33,26 @@ func (p *Page) IsHighlighted(tag string) (highlighted bool) {
 	return false
 }
 
+func (p *Page) RedHighlightedTags() []string {
+	var reds []string = nil
+	for _, highlighted := range p.HighlightedTags {
+		if p.ShouldHighlightRed(highlighted) {
+			reds = append(reds, highlighted)
+		}
+	}
+	return reds
+}
+
+func (p *Page) ShouldHighlightRed(tag string) bool {
+	return tag == "outdated" || tag == "wip"
+}
+
 func (p *Page) ShowArticleListInsteadOfContent() bool {
 	return (len(p.Articles) > 1) || (len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.contentTemplate == "")
+}
+
+func (p *Page) IsTagListVisible() bool {
+	return len(p.Tags) > 0
 }
 
 func (p *Page) ArticleListHeader() string {
@@ -45,10 +63,6 @@ func (p *Page) ArticleListHeader() string {
 	} else {
 		return "All articles"
 	}
-}
-
-func (p *Page) IsTagListVisible() bool {
-	return len(p.Tags) > 0
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {

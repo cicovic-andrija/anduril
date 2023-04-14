@@ -48,6 +48,7 @@
                 </div>
 
                 {{ else }}
+
                 <!-- Article list OR content of a specific article -->
                 <div class="col-lg">
                 {{ if .ShowArticleListInsteadOfContent }}
@@ -58,23 +59,26 @@
                     <h6 class="text-secondary">{{ .Subtitle }}</h6>
                 </div>
                 {{ end }}
+
                 {{ else }}
-                {{ template "articleContent" . }}
+                {{ range .RedHighlightedTags }}
+                    <h4><span class="badge bg-danger">{{ . }}</span></h4>
+                {{ end }}
+                    {{ template "articleContent" . }}
                 {{ end }}
                 </div>
 
                 {{ if .IsTagListVisible }}
                 <!-- Tag sidebar (list of tags) on the right -->
                 <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
-                    <a href="/tags"
-                        class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
+                    <a href="/tags" class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
                         <span class="fs-5">Tags</span>
                     </a>
                     <div class="list-group list-group-flush border-bottom scrollarea">
                         {{ range .Tags }}
                         <a href="/tags/{{ . }}" class="list-group-item list-group-item-action py-3 lh-tight">
                             <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1{{ if $.IsHighlighted . }} {{ if eq . "wip" }} text-danger {{ else }} text-primary {{ end }} {{ else }} text-secondary {{ end }}">
+                                <strong class="mb-1{{ if $.IsHighlighted . }} {{ if $.ShouldHighlightRed . }} text-danger {{ else }} text-primary {{ end }} {{ else }} text-secondary {{ end }}">
                                     {{ . }}
                                 </strong>
                             </div>
