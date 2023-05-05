@@ -53,7 +53,7 @@ func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
 		revision = s.latestRevision
 	}
 
-	err := s.renderListOfAllArticlesAndTags(w, revision)
+	err := s.renderListOfTaggedArticles(w, revision)
 	if err != nil {
 		s.warn("failed to render list of all articles and tags: %v", err)
 	}

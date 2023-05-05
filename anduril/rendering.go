@@ -21,6 +21,7 @@ type Page struct {
 	Tags            []string
 	HighlightedTags []string
 	Is404           bool
+	FooterText      string
 	contentTemplate string
 }
 
@@ -44,7 +45,7 @@ func (p *Page) RedHighlightedTags() []string {
 }
 
 func (p *Page) ShouldHighlightRed(tag string) bool {
-	return tag == "outdated" || tag == "wip"
+	return tag == WIPTag || tag == OutdatedTag
 }
 
 func (p *Page) ShowArticleListInsteadOfContent() bool {
@@ -71,14 +72,16 @@ func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revis
 		Articles:        []*Article{article},
 		HighlightedTags: append([]string{}, article.Tags...),
 		Tags:            revision.SortedTags,
+		FooterText:      article.Subtitle,
 		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
 	})
 }
 
 func (s *WebServer) renderListOfAllArticles(w io.Writer, revision *Revision) error {
 	return s.renderPage(w, &Page{
-		Title:    "Articles",
-		Articles: revision.SortedArticles,
+		Title:      "Articles",
+		Articles:   revision.SortedArticles,
+		FooterText: "This list is sorted by article title.",
 	})
 }
 
@@ -88,14 +91,16 @@ func (s *WebServer) renderListOfAllArticlesForTag(w io.Writer, tag string, artic
 		Articles:        articles,
 		HighlightedTags: []string{tag},
 		Tags:            revision.SortedTags,
+		FooterText:      "This list is sorted by article title.",
 	})
 }
 
-func (s *WebServer) renderListOfAllArticlesAndTags(w io.Writer, revision *Revision) error {
+func (s *WebServer) renderListOfTaggedArticles(w io.Writer, revision *Revision) error {
 	return s.renderPage(w, &Page{
-		Title:    "Tags",
-		Articles: revision.SortedArticles,
-		Tags:     revision.SortedTags,
+		Title:      "Tags",
+		Articles:   revision.SortedArticles,
+		Tags:       revision.SortedTags,
+		FooterText: "This list is sorted by article title.",
 	})
 }
 

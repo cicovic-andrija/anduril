@@ -14,6 +14,12 @@ import (
 
 // Structures and routines for processing data files (articles) in markdown format.
 
+// Tags which trigger special behavior or special rendering.
+const (
+	WIPTag      = "wip"
+	OutdatedTag = "outdated"
+)
+
 type Article struct {
 	Title        string    `yaml:"title"`
 	Subtitle     string    `yaml:"-"`
@@ -86,6 +92,11 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 	// Note: will be sorted later.
 	revision.SortedArticles = append(revision.SortedArticles, article)
 
+	// Ensure every article is tagged; articles without tags are viewed as incomplete.
+	if len(article.Tags) == 0 {
+		article.Tags = []string{WIPTag}
+	}
+
 	// Cache tags.
 	for _, tag := range article.Tags {
 		revision.Tags[tag] = append(revision.Tags[tag], article)
@@ -140,3 +151,5 @@ func (a *Article) VersionedHTMLTemplate(versionHash string) string {
 func VersionedArticleTemplateSuffix(versionHash string) string {
 	return fmt.Sprintf("_%s.html", versionHash)
 }
+
+func PrettyDate()

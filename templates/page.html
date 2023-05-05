@@ -21,6 +21,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/tags">Tags</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/articles/about">About</a>
+                    </li>
                 </ul>
                 <form action="/search" method="GET">
                     <input id="search-input-box" type="search" name="what" class="form-control" placeholder="Search...">
@@ -104,6 +107,10 @@
                 <hr class="mb-1">
                 <p class="text-start text-muted">
                     <a href="#"><small>Top</small></a>
+                    {{ if .FooterText }}
+                    <small>&nbsp;|&nbsp;</small>
+                    <small>{{ .FooterText }}</small>
+                    {{ end }}
                 </p>
             </div>
             <!-- Empty space to the right on large+ viewports -->
