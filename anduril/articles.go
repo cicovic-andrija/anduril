@@ -151,5 +151,3 @@ func (a *Article) VersionedHTMLTemplate(versionHash string) string {
 func VersionedArticleTemplateSuffix(versionHash string) string {
 	return fmt.Sprintf("_%s.html", versionHash)
 }
-
-func PrettyDate()
