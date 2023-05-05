@@ -67,16 +67,12 @@ func (p *Page) ArticleListHeader() string {
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
-	footerText := article.Subtitle
-	if len(article.Tags) == 1 && article.Tags[0] == MetaPageTag {
-		footerText = GenerateFooterText()
-	}
 	return s.renderPage(w, &Page{
 		Title:           article.Title,
 		Articles:        []*Article{article},
 		HighlightedTags: append([]string{}, article.Tags...),
 		Tags:            revision.SortedTags,
-		FooterText:      footerText,
+		FooterText:      article.Subtitle,
 		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
 	})
 }
@@ -85,7 +81,7 @@ func (s *WebServer) renderListOfAllArticles(w io.Writer, revision *Revision) err
 	return s.renderPage(w, &Page{
 		Title:      "Articles",
 		Articles:   revision.SortedArticles,
-		FooterText: "This list is sorted by article title.",
+		FooterText: fmt.Sprintf("There are %d articles listed.", len(revision.SortedArticles)),
 	})
 }
 
@@ -95,7 +91,7 @@ func (s *WebServer) renderListOfAllArticlesForTag(w io.Writer, tag string, artic
 		Articles:        articles,
 		HighlightedTags: []string{tag},
 		Tags:            revision.SortedTags,
-		FooterText:      "This list is sorted by article title.",
+		FooterText:      fmt.Sprintf("There are %d articles listed.", len(articles)),
 	})
 }
 
@@ -104,7 +100,7 @@ func (s *WebServer) renderListOfTaggedArticles(w io.Writer, revision *Revision) 
 		Title:      "Tags",
 		Articles:   revision.SortedArticles,
 		Tags:       revision.SortedTags,
-		FooterText: "This list is sorted by article title.",
+		FooterText: fmt.Sprintf("There are %d tags listed.", len(revision.SortedTags)),
 	})
 }
 
@@ -122,8 +118,4 @@ func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 		return fmt.Errorf("failed to parse one or more template files: %v", err)
 	}
 	return t.ExecuteTemplate(w, PageTemplate, page)
-}
-
-func GenerateFooterText() string {
-	return ""
 }
