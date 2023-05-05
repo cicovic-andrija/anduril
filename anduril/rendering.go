@@ -53,7 +53,7 @@ func (p *Page) ShowArticleListInsteadOfContent() bool {
 }
 
 func (p *Page) IsTagListVisible() bool {
-	return len(p.Tags) > 0
+	return len(p.Tags) > 0 && !(len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.HighlightedTags[0] == MetaPageTag)
 }
 
 func (p *Page) ArticleListHeader() string {
@@ -67,12 +67,16 @@ func (p *Page) ArticleListHeader() string {
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
+	footerText := article.Subtitle
+	if len(article.Tags) == 1 && article.Tags[0] == MetaPageTag {
+		footerText = GenerateFooterText()
+	}
 	return s.renderPage(w, &Page{
 		Title:           article.Title,
 		Articles:        []*Article{article},
 		HighlightedTags: append([]string{}, article.Tags...),
 		Tags:            revision.SortedTags,
-		FooterText:      article.Subtitle,
+		FooterText:      footerText,
 		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
 	})
 }
@@ -118,4 +122,8 @@ func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 		return fmt.Errorf("failed to parse one or more template files: %v", err)
 	}
 	return t.ExecuteTemplate(w, PageTemplate, page)
+}
+
+func GenerateFooterText() string {
+	return ""
 }

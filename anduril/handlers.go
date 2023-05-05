@@ -10,7 +10,7 @@ import (
 func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		u := &url.URL{
-			Path:     "/articles",
+			Path:     "/home",
 			RawQuery: r.URL.RawQuery,
 		}
 		http.Redirect(w, r, u.String(), http.StatusMovedPermanently)
@@ -104,6 +104,15 @@ func (s *WebServer) registerHandlers() {
 	)
 
 	s.httpsServer.Handle(
+		"/home",
+		https.Adapt(
+			http.HandlerFunc(s.ArticleHandlerLocked),
+			s.FindAndLock(ArticleObject),
+			https.StripPrefix("/"),
+		),
+	)
+
+	s.httpsServer.Handle(
 		"/tags",
 		http.HandlerFunc(s.TagRootHandler),
 	)
@@ -130,6 +139,15 @@ func (s *WebServer) registerHandlers() {
 			s.FindAndLock(ArticleObject),
 			https.StripPrefix("/articles/"),
 			https.RedirectRootToParentTree,
+		),
+	)
+
+	s.httpsServer.Handle(
+		"/about",
+		https.Adapt(
+			http.HandlerFunc(s.ArticleHandlerLocked),
+			s.FindAndLock(ArticleObject),
+			https.StripPrefix("/"),
 		),
 	)
 }

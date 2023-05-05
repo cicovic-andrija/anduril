@@ -14,8 +14,9 @@ import (
 
 // Structures and routines for processing data files (articles) in markdown format.
 
-// Tags which trigger special behavior or special rendering.
+// Tags which trigger special behavior or different way of rendering.
 const (
+	MetaPageTag = "meta"
 	WIPTag      = "wip"
 	OutdatedTag = "outdated"
 )
