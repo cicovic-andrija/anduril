@@ -23,7 +23,7 @@ const (
 
 type Article struct {
 	Title        string    `yaml:"title"`
-	Subtitle     string    `yaml:"-"`
+	Subtitle     string    `yaml:"subtitle"`
 	Tags         []string  `yaml:"tags"`
 	Created      string    `yaml:"created"`
 	CreatedTime  time.Time `yaml:"-"`
@@ -140,7 +140,10 @@ func (a *Article) Normalize() (err error) {
 	}
 
 	a.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(a.File, ".md")), " ", "-")
-	a.Subtitle = fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
+
+	if a.Subtitle == "" {
+		a.Subtitle = fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
+	}
 
 	return nil
 }
