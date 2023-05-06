@@ -27,12 +27,18 @@ function registerKeyListener() {
 function appendCopyButtons() {
     const preBlocks = document.querySelectorAll("pre")
     preBlocks.forEach(block => {
+        block.setAttribute("class", "d-flex")
+
+        const codeBlocks = block.querySelectorAll("code")
+        codeBlocks.forEach(codeBlock => {
+            codeBlock.setAttribute("class", "col p-2 me-2 font-monospace bg-light border border-secondary rounded")
+        })
+
         const copyButton = document.createElement("button")
         copyButton.innerHTML = "Copy"
         copyButton.setAttribute("type", "button")
-        copyButton.setAttribute("class", "btn btn-primary float-end")
+        copyButton.setAttribute("class", "col-1 btn btn-primary ")
         copyButton.addEventListener("click", handleCopyClick)
-        block.setAttribute("class", "font-monospace bg-light")
         block.append(copyButton)
     })
 }
