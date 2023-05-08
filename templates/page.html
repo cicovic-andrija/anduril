@@ -58,7 +58,7 @@
                 {{ range .Articles }}
                 <div>
                     <h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h3>
-                    <h6 class="text-secondary">{{ .Subtitle }}</h6>
+                    <h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
                 </div>
                 {{ end }}
                 {{ else }}

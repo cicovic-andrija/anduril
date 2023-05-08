@@ -23,7 +23,7 @@ const (
 
 type Article struct {
 	Title        string    `yaml:"title"`
-	Subtitle     string    `yaml:"subtitle"`
+	Comment      string    `yaml:"comment"`
 	Tags         []string  `yaml:"tags"`
 	Created      string    `yaml:"created"`
 	CreatedTime  time.Time `yaml:"-"`
@@ -141,15 +141,15 @@ func (a *Article) Normalize() (err error) {
 
 	a.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(a.File, ".md")), " ", "-")
 
-	if a.Subtitle == "" {
-		a.Subtitle = fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
-	}
-
 	return nil
 }
 
 func (a *Article) VersionedHTMLTemplate(versionHash string) string {
 	return fmt.Sprintf("%s%s", a.Key, VersionedArticleTemplateSuffix(versionHash))
+}
+
+func (a *Article) LastModificationDateMessage() string {
+	return fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
 }
 
 func VersionedArticleTemplateSuffix(versionHash string) string {

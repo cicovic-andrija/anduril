@@ -67,12 +67,17 @@ func (p *Page) ArticleListHeader() string {
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
+	footerText := article.LastModificationDateMessage()
+	if article.Comment != "" {
+		footerText = article.Comment
+	}
+
 	return s.renderPage(w, &Page{
 		Title:           article.Title,
 		Articles:        []*Article{article},
 		HighlightedTags: append([]string{}, article.Tags...),
 		Tags:            revision.SortedTags,
-		FooterText:      article.Subtitle,
+		FooterText:      footerText,
 		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
 	})
 }
