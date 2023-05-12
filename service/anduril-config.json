@@ -21,7 +21,7 @@
         "allow_only_get_requests": true
     },
     "repository": {
-        "protocol": "https",
+        "protocol": "ssh",
         "host": "github.com",
         "repo_url_path": "/cicovic-andrija/notes.git",
         "remote": "origin",
