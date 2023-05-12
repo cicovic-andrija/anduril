@@ -117,8 +117,8 @@ func (s *WebServer) startPeriodicTasks() {
 	}
 
 	s.taskWaitGroup.Add(N)
-	go s.genericPeriodicTask(s.checkForNewRevision, 15*time.Second, s.stopChannels[0], RepositoryProcessorTag)
-	go s.genericPeriodicTask(s.cleanUpCompiledFiles, 24*time.Hour, s.stopChannels[1], CleanupTaskTag)
+	go s.genericPeriodicTask(s.checkForNewRevision, 15*time.Minute, s.stopChannels[0], RepositoryTag)
+	go s.genericPeriodicTask(s.cleanUpCompiledFiles, 24*time.Hour, s.stopChannels[1], CleanupTag)
 }
 
 func (s *WebServer) stopPeriodicTasks() {

@@ -45,7 +45,7 @@ func (p *Page) RedHighlightedTags() []string {
 }
 
 func (p *Page) ShouldHighlightRed(tag string) bool {
-	return tag == WIPTag || tag == OutdatedTag
+	return tag == DraftTag || tag == OutdatedTag
 }
 
 func (p *Page) ShowArticleListInsteadOfContent() bool {

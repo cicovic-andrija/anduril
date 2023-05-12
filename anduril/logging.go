@@ -10,10 +10,10 @@ import (
 type TraceTag string
 
 const (
-	MarkdownProcessorTag   TraceTag = "MarkdownProcessor"
-	RepositoryProcessorTag TraceTag = "RepositoryProcessor"
-	ExecutorTag            TraceTag = "Executor"
-	CleanupTaskTag         TraceTag = "CleanupTask"
+	MarkdownProcessorTag TraceTag = "MarkdownProcessor"
+	RepositoryTag        TraceTag = "Repository"
+	ExecutorTag          TraceTag = "Executor"
+	CleanupTag           TraceTag = "Cleanup"
 )
 
 func (s *WebServer) log(format string, v ...interface{}) {

@@ -14,11 +14,14 @@ import (
 
 // Structures and routines for processing data files (articles) in markdown format.
 
+const MarkdownExtension = ".md"
+
 // Tags which trigger special behavior or different way of rendering.
 const (
-	MetaPageTag = "meta"
-	WIPTag      = "wip"
-	OutdatedTag = "outdated"
+	MetaPageTag     = "meta"
+	DoNotPublishTag = "do-not-publish"
+	DraftTag        = "draft"
+	OutdatedTag     = "outdated"
 )
 
 type Article struct {
@@ -37,8 +40,11 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	if err := util.EnumerateDirectory(
 		revision.ContainerPath,
 		func(fileName string) {
-			err := s.processDataFile(revision, fileName)
-			if err != nil {
+			if !strings.HasSuffix(fileName, MarkdownExtension) {
+				s.warn("file %s does not have the expected extension %q and will not been processed", fileName, MarkdownExtension)
+				return
+			}
+			if err := s.processDataFile(revision, fileName); err != nil {
 				s.warn("failed to process data file %s: %v", fileName, err)
 			}
 		},
@@ -83,6 +89,10 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 		return fmt.Errorf("failed to parse metadata: %v", err)
 	}
 
+	if contains(article.Tags, DoNotPublishTag) {
+		return nil
+	}
+
 	if err := article.Normalize(); err != nil {
 		return fmt.Errorf("invalid metadata: %v", err)
 	}
@@ -95,7 +105,7 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 
 	// Ensure every article is tagged; articles without tags are viewed as incomplete.
 	if len(article.Tags) == 0 {
-		article.Tags = []string{WIPTag}
+		article.Tags = []string{DraftTag}
 	}
 
 	// Cache tags.
@@ -154,4 +164,13 @@ func (a *Article) LastModificationDateMessage() string {
 
 func VersionedArticleTemplateSuffix(versionHash string) string {
 	return fmt.Sprintf("_%s.html", versionHash)
+}
+
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
