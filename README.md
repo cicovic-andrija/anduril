@@ -21,6 +21,8 @@ systemctl status anduril.service
 exit
 ```
 
+### TBD: Note about `.ssh/known_hosts` file for `github.com`
+
 ## Local monitoring
 
 ```
