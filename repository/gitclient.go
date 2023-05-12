@@ -8,6 +8,8 @@ import (
 	"github.com/cicovic-andrija/anduril/service"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
 type GitRepository struct {
@@ -70,11 +72,17 @@ func (r *GitRepository) openOrClone() error {
 		return r.validateRefs(local)
 	}
 
+	auth, err := r.authMethod()
+	if err != nil {
+		return fmt.Errorf("clone repository: auth failed: %v", err)
+	}
+
 	clone, err := git.PlainClone(
 		r.root,
 		false, // bare
 		&git.CloneOptions{
 			URL:           r.URL(),
+			Auth:          auth,
 			RemoteName:    r.Remote,
 			ReferenceName: plumbing.NewBranchReferenceName(r.Branch),
 			Progress:      io.Discard,
@@ -96,7 +104,17 @@ func (r *GitRepository) pull() (new bool, err error) {
 		return
 	}
 
-	err = w.Pull(&git.PullOptions{RemoteName: r.Remote})
+	auth, err := r.authMethod()
+	if err != nil {
+		err = fmt.Errorf("pull: auth failed: %v", err)
+		return
+	}
+
+	err = w.Pull(&git.PullOptions{
+		RemoteName: r.Remote,
+		Auth:       auth,
+	})
+
 	switch err {
 	case nil:
 		r.trace("pull: successfully fetched and merged latest changes")
@@ -140,4 +158,11 @@ func (r *GitRepository) validateRefs(repo *git.Repository) error {
 	r.repo = repo
 	r.tipHash = current.Hash().String()
 	return nil
+}
+
+func (r *GitRepository) authMethod() (transport.AuthMethod, error) {
+	if r.Protocol != SSHProtocol {
+		return nil, nil
+	}
+	return ssh.NewPublicKeysFromFile(r.SSHAuth.User, r.SSHAuth.PrivateKeyPath, "" /* password */)
 }

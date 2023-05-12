@@ -8,8 +8,9 @@ import (
 
 // Package errors.
 var (
-	ErrNotInitialized  = errors.New("repository not initialized")
-	ErrInvalidProtocol = errors.New("invalid protocol, allowed values are 'https' and 'ssh'")
+	ErrNotInitialized   = errors.New("repository not initialized")
+	ErrInvalidProtocol  = errors.New("invalid protocol, allowed values are 'https' and 'ssh'")
+	ErrAuthParamMissing = errors.New("missing authentication parameter")
 )
 
 // Repository is a local set of files managed by a version control system.
