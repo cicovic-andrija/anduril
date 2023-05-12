@@ -3,20 +3,14 @@ package anduril
 import (
 	"encoding/json"
 
+	"github.com/cicovic-andrija/anduril/repository"
 	"github.com/cicovic-andrija/go-util"
 	"github.com/cicovic-andrija/https"
 )
 
 type Config struct {
-	HTTPS      https.Config     `json:"https"`
-	Repository RepositoryConfig `json:"repository"`
-}
-
-type RepositoryConfig struct {
-	URL                 string `json:"url"`
-	Remote              string `json:"remote"`
-	Branch              string `json:"branch"`
-	RelativeContentPath string `json:"relative_content_path"`
+	HTTPS      https.Config      `json:"https"`
+	Repository repository.Config `json:"repository"`
 }
 
 func ReadConfig(path string) (*Config, error) {

@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cicovic-andrija/anduril/repository"
+	"github.com/cicovic-andrija/anduril/service"
 	"github.com/cicovic-andrija/go-util"
 	"github.com/cicovic-andrija/https"
 )
@@ -16,7 +18,7 @@ import (
 type WebServer struct {
 	env            *Environment
 	httpsServer    *https.HTTPSServer
-	repository     *RepositoryProcessor
+	repository     repository.Repository
 	latestRevision *Revision
 	revisionLock   *sync.RWMutex
 	executor       *Executor
@@ -49,10 +51,13 @@ func NewWebServer(env *Environment, config *Config) (server *WebServer, err erro
 		logger:      logger,
 	}
 
-	// Explicitly set repo to nil: struct not initialized.
-	webServer.repository = &RepositoryProcessor{
-		RepositoryConfig: config.Repository,
-		repo:             nil,
+	gitRepo := &repository.GitRepository{
+		Config: config.Repository,
+	}
+	if err = gitRepo.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid repository configuration: %v", err)
+	} else {
+		webServer.repository = gitRepo
 	}
 
 	// Explicitly set to nil: not initialized.
@@ -112,7 +117,7 @@ func (s *WebServer) startPeriodicTasks() {
 	}
 
 	s.taskWaitGroup.Add(N)
-	go s.genericPeriodicTask(s.checkForNewRevision, 15*time.Minute, s.stopChannels[0], RepositoryProcessorTag)
+	go s.genericPeriodicTask(s.checkForNewRevision, 15*time.Second, s.stopChannels[0], RepositoryProcessorTag)
 	go s.genericPeriodicTask(s.cleanUpCompiledFiles, 24*time.Hour, s.stopChannels[1], CleanupTaskTag)
 }
 
@@ -123,7 +128,7 @@ func (s *WebServer) stopPeriodicTasks() {
 	s.taskWaitGroup.Wait()
 }
 
-func (s *WebServer) genericPeriodicTask(f func(TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
+func (s *WebServer) genericPeriodicTask(f func(service.TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
 	s.log("starting timer task %s", tag)
 	trace := s.generateTraceCallback(tag)
 	ticker := time.NewTicker(period)

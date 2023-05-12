@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+
+	"github.com/cicovic-andrija/anduril/service"
 )
 
 type Executor struct {
-	trace TraceCallback
+	trace service.TraceCallback
 }
 
 func (e *Executor) ConvertMarkdownToHTML(inputFilePath string, outputFilePath string) error {

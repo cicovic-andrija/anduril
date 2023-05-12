@@ -6,32 +6,32 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cicovic-andrija/anduril/service"
 	"github.com/cicovic-andrija/go-util"
 )
 
-func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) error {
+func (s *WebServer) checkForNewRevision(trace service.TraceCallback, v ...interface{}) error {
 	var (
 		found bool
+		err   error
 	)
 
 	trace("checking for new content revision...")
 
 	// First iteration will initialize the repository.
-	if s.repository.repo == nil {
-		s.repository.trace = trace
-		err := s.repository.OpenOrClone(filepath.Join(s.env.WorkDirectoryPath(), repositorySubdir))
-		if err != nil {
+	if s.repository.Empty() {
+		repoRoot := filepath.Join(s.env.WorkDirectoryPath(), repositorySubdir)
+		if err = s.repository.Initialize(repoRoot, trace); err != nil {
 			return err
 		}
 		found = true
 	}
 
-	if !found && s.repository.repo != nil {
-		new, err := s.repository.Pull()
+	if !found && !s.repository.Empty() {
+		found, err = s.repository.Sync()
 		if err != nil {
 			return err
 		}
-		found = new
 	}
 
 	if found {
@@ -41,7 +41,7 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 			Tags:           make(map[string][]*Article),
 			SortedTags:     make([]string, 0),
 			ContainerPath:  s.repository.ContentRoot(),
-			Hash:           s.repository.LatestCommitShortHash(),
+			Hash:           s.repository.LatestRevisionID(),
 		}
 		trace("new revision found with hash %s", revision.Hash)
 
@@ -59,7 +59,7 @@ func (s *WebServer) checkForNewRevision(trace TraceCallback, v ...interface{}) e
 	return nil
 }
 
-func (s *WebServer) cleanUpCompiledFiles(trace TraceCallback, v ...interface{}) error {
+func (s *WebServer) cleanUpCompiledFiles(trace service.TraceCallback, v ...interface{}) error {
 	trace("checking for stale files ready for cleanup...")
 
 	if s.latestRevision == nil {

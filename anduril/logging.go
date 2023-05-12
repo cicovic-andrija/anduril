@@ -3,6 +3,7 @@ package anduril
 import (
 	"fmt"
 
+	"github.com/cicovic-andrija/anduril/service"
 	"github.com/cicovic-andrija/go-util"
 )
 
@@ -33,9 +34,7 @@ func (s *WebServer) error(format string, v ...interface{}) error {
 	return err
 }
 
-type TraceCallback func(string, ...interface{})
-
-func (s *WebServer) generateTraceCallback(tag TraceTag) TraceCallback {
+func (s *WebServer) generateTraceCallback(tag TraceTag) service.TraceCallback {
 	return func(format string, v ...interface{}) {
 		s.logger.Output(util.SevInfo, 2, "["+string(tag)+"]: "+format, v...)
 	}
