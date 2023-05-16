@@ -66,6 +66,38 @@ func (p *Page) ArticleListHeader() string {
 	}
 }
 
+type InterestingTopic struct {
+	Title       string
+	Description string
+	Tag         string
+	Articles    []*Article
+}
+
+var interestingTopics = []*InterestingTopic{
+	{
+		Title:       "About programming",
+		Description: "Notes, guides and cheatsheets related to software engineering.",
+		Tag:         "programming",
+	},
+	{
+		Title:       "About diving",
+		Description: "Various notes about diving practices and equipment.",
+		Tag:         "diving",
+	},
+}
+
+func (p *Page) InterestingTopics() []*InterestingTopic {
+	for _, topic := range interestingTopics {
+		topic.Articles = []*Article{}
+		for _, article := range p.Articles {
+			if contains(article.Tags, topic.Tag) {
+				topic.Articles = append(topic.Articles, article)
+			}
+		}
+	}
+	return interestingTopics
+}
+
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
 	footerText := article.LastModificationDateMessage()
 	if article.Comment != "" {
