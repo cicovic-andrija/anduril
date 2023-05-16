@@ -37,7 +37,7 @@ function appendCopyButtons() {
         const copyButton = document.createElement("button")
         copyButton.innerHTML = "Copy"
         copyButton.setAttribute("type", "button")
-        copyButton.setAttribute("class", "col-1 btn btn-primary ")
+        copyButton.setAttribute("class", "col-1 align-self-start btn btn-primary ")
         copyButton.addEventListener("click", handleCopyClick)
         block.append(copyButton)
     })
