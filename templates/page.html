@@ -12,7 +12,7 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
         <div class="container">
             <!-- pb-2 aligns the brand with the other items in the navbar -->
-            <a class="navbar-brand pb-2" href="/">Andúril</a>
+            <a class="navbar-brand pb-2" href="/">AMAN</a>
             <div class="collapse navbar-collapse pb-2 pb-lg-0" id="navbarContent">
                 <ul class="navbar-nav me-auto pb-2 pb-lg-0">
                     <li class="nav-item">
@@ -71,7 +71,7 @@
 
                 {{ if .IsTagListVisible }}
                 <!-- Tag sidebar (list of tags) on the right -->
-                <div class="col-lg-3 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
+                <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
                     <a href="/tags"
                         class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
                         <span class="fs-5">Tags</span>
@@ -92,11 +92,12 @@
 
                 {{ if and .ShowArticleListInsteadOfContent (not .IsTagListVisible) }}
                 <div class="col-lg-5">
+                    <h1>&nbsp;</h1>
                     {{ range .InterestingTopics }}
-                    <h1>{{ .Title }}</h1>
+                    <h3>{{ .Title }}</h3>
                     <blockquote><p>{{ .Description }}</p></blockquote>
                     {{ range .Articles }}
-                    <h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+                    <h5><a href="/articles/{{ .Key }}">{{ .Title }}</a></h5>
                     {{ end }}
                     {{ end }}
                 </div>
