@@ -18,10 +18,11 @@ const MarkdownExtension = ".md"
 
 // Tags which trigger special behavior or different way of rendering.
 const (
-	MetaPageTag     = "meta"
-	DoNotPublishTag = "do-not-publish"
-	DraftTag        = "draft"
-	OutdatedTag     = "outdated"
+	MetaPageTag        = "meta"
+	DoNotPublishTag    = "do-not-publish"
+	DraftTag           = "draft"
+	OutdatedTag        = "outdated"
+	PersonalArticleTag = "my"
 )
 
 type Article struct {
@@ -60,7 +61,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
 			filepath.Join(revision.ContainerPath, article.File),
-			filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir, article.VersionedHTMLTemplate(revision.Hash)),
+			filepath.Join(s.env.CompiledWorkDirectory(), article.VersionedHTMLTemplate(revision.Hash)),
 		)
 		if err != nil {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)

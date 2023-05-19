@@ -1,4 +1,4 @@
-package anduril
+package service
 
 import (
 	"errors"
@@ -9,18 +9,6 @@ import (
 	"runtime"
 
 	"github.com/cicovic-andrija/go-util"
-)
-
-// Data subdirectories.
-const (
-	staticSubdir    = "static"
-	templatesSubdir = "templates"
-)
-
-// Work subdirectories.
-const (
-	repositorySubdir = "repository"
-	compiledSubdir   = "compiled"
 )
 
 // External programs.
@@ -61,12 +49,12 @@ func ReadEnvironment() (*Environment, error) {
 	return env, nil
 }
 
-func PrepareEnvironment(env *Environment) error {
+func (env *Environment) Initialize() error {
 	for _, directory := range []string{
 		env.WorkDirectoryPath(),
 		env.LogsDirectoryPath(),
-		filepath.Join(env.WorkDirectoryPath(), repositorySubdir),
-		filepath.Join(env.WorkDirectoryPath(), compiledSubdir),
+		env.RepositoryWorkingDirectory(),
+		env.CompiledWorkDirectory(),
 	} {
 		if err := util.MkdirIfNotExists(directory); err != nil {
 			return err
@@ -75,6 +63,18 @@ func PrepareEnvironment(env *Environment) error {
 
 	env.initd = true
 	return nil
+}
+
+func (env *Environment) IsInitialized() bool {
+	return env.initd
+}
+
+func (env *Environment) PID() int {
+	return env.pid
+}
+
+func (env *Environment) WDP() string {
+	return env.wd
 }
 
 func (env *Environment) DataDirectoryPath() string {
@@ -98,9 +98,21 @@ func (env *Environment) PrimaryLogPath() string {
 }
 
 func (env *Environment) TemplatePath(templateName string) string {
-	return filepath.Join(env.DataDirectoryPath(), templatesSubdir, templateName)
+	return filepath.Join(env.DataDirectoryPath(), "templates", templateName)
+}
+
+func (env *Environment) StaticDataDirectory() string {
+	return filepath.Join(env.DataDirectoryPath(), "static")
+}
+
+func (env *Environment) RepositoryWorkingDirectory() string {
+	return filepath.Join(env.WorkDirectoryPath(), "repository")
+}
+
+func (env *Environment) CompiledWorkDirectory() string {
+	return filepath.Join(env.WorkDirectoryPath(), "compiled")
 }
 
 func (env *Environment) CompiledTemplatePath(templateName string) string {
-	return filepath.Join(env.WorkDirectoryPath(), compiledSubdir, templateName)
+	return filepath.Join(env.CompiledWorkDirectory(), templateName)
 }

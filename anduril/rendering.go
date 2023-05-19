@@ -95,7 +95,7 @@ func (p *Page) InterestingTopics() []*InterestingTopic {
 	for _, topic := range interestingTopics {
 		topic.Articles = []*Article{}
 		for _, article := range p.Articles {
-			if contains(article.Tags, topic.Tag) {
+			if contains(article.Tags, topic.Tag) && !contains(article.Tags, PersonalArticleTag) {
 				topic.Articles = append(topic.Articles, article)
 			}
 		}

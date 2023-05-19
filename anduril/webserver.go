@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -16,7 +15,7 @@ import (
 )
 
 type WebServer struct {
-	env            *Environment
+	env            *service.Environment
 	httpsServer    *https.HTTPSServer
 	repository     repository.Repository
 	latestRevision *Revision
@@ -28,9 +27,13 @@ type WebServer struct {
 	startedAt      time.Time
 }
 
-func NewWebServer(env *Environment, config *Config) (server *WebServer, err error) {
-	if env == nil || !env.initd {
+func NewWebServer(env *service.Environment, config *Config) (server *WebServer, err error) {
+	if env == nil || !env.IsInitialized() {
 		return nil, errors.New("environment not initialized")
+	}
+
+	if config == nil {
+		return nil, errors.New("invalid configuration object: null")
 	}
 
 	logger, err := util.NewFileLog(env.PrimaryLogPath())
@@ -39,7 +42,7 @@ func NewWebServer(env *Environment, config *Config) (server *WebServer, err erro
 	}
 
 	config.HTTPS.LogsDirectory = env.LogsDirectoryPath()
-	config.HTTPS.FileServer.Directory = filepath.Join(env.DataDirectoryPath(), staticSubdir)
+	config.HTTPS.FileServer.Directory = env.StaticDataDirectory()
 	httpsServer, err := https.NewServer(&config.HTTPS)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init HTTPS server: %v", err)
@@ -73,8 +76,8 @@ func NewWebServer(env *Environment, config *Config) (server *WebServer, err erro
 
 func (s *WebServer) ListenAndServe() {
 	s.startedAt = time.Now().UTC()
-	s.log("pid: %d", s.env.pid)
-	s.log("working directory: %s", s.env.wd)
+	s.log("pid: %d", s.env.PID())
+	s.log("working directory: %s", s.env.WDP())
 	s.log("primary log location: %s", s.logger.LogPath())
 	s.log("HTTPS server log location: %s", s.httpsServer.GetLogPath())
 	s.log("HTTPS requests log location: %s", s.httpsServer.GetRequestsLogPath())

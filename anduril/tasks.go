@@ -20,7 +20,7 @@ func (s *WebServer) checkForNewRevision(trace service.TraceCallback, v ...interf
 
 	// First iteration will initialize the repository.
 	if s.repository.Empty() {
-		repoRoot := filepath.Join(s.env.WorkDirectoryPath(), repositorySubdir)
+		repoRoot := s.env.RepositoryWorkingDirectory()
 		if err = s.repository.Initialize(repoRoot, trace); err != nil {
 			return err
 		}
@@ -72,10 +72,10 @@ func (s *WebServer) cleanUpCompiledFiles(trace service.TraceCallback, v ...inter
 	cleanedUp := 0
 
 	if err := util.EnumerateDirectory(
-		filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir),
+		filepath.Join(s.env.CompiledWorkDirectory()),
 		func(fileName string) {
 			if !strings.HasSuffix(fileName, latestVersionSuffix) {
-				if err := os.Remove(filepath.Join(s.env.WorkDirectoryPath(), compiledSubdir, fileName)); err == nil {
+				if err := os.Remove(s.env.CompiledTemplatePath(fileName)); err == nil {
 					cleanedUp += 1
 					trace("%s was cleaned up", fileName)
 				} else {

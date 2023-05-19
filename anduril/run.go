@@ -1,12 +1,14 @@
 package anduril
 
+import "github.com/cicovic-andrija/anduril/service"
+
 func Run() {
-	env, err := ReadEnvironment()
+	env, err := service.ReadEnvironment()
 	if err != nil {
 		panic(err)
 	}
 
-	err = PrepareEnvironment(env)
+	err = env.Initialize()
 	if err != nil {
 		panic(err)
 	}
