@@ -19,9 +19,9 @@ const MarkdownExtension = ".md"
 // Tags which trigger special behavior or different way of rendering.
 const (
 	MetaPageTag        = "meta"
-	DoNotPublishTag    = "do-not-publish"
 	DraftTag           = "draft"
 	OutdatedTag        = "outdated"
+	PrivateArticleTag  = "private"
 	PersonalArticleTag = "my"
 )
 
@@ -90,7 +90,11 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 		return fmt.Errorf("failed to parse metadata: %v", err)
 	}
 
-	if contains(article.Tags, DoNotPublishTag) {
+	if !s.settings.PublishPrivateArticles && contains(article.Tags, PrivateArticleTag) {
+		return nil
+	}
+
+	if !s.settings.PublishPersonalArticles && contains(article.Tags, PersonalArticleTag) {
 		return nil
 	}
 

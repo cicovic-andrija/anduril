@@ -10,7 +10,7 @@ import (
 	"github.com/cicovic-andrija/go-util"
 )
 
-func (s *WebServer) checkForNewRevision(trace service.TraceCallback, v ...interface{}) error {
+func (s *WebServer) syncRepository(trace service.TraceCallback, v ...interface{}) error {
 	var (
 		found bool
 		err   error
@@ -59,7 +59,7 @@ func (s *WebServer) checkForNewRevision(trace service.TraceCallback, v ...interf
 	return nil
 }
 
-func (s *WebServer) cleanUpCompiledFiles(trace service.TraceCallback, v ...interface{}) error {
+func (s *WebServer) cleanUpStaleFiles(trace service.TraceCallback, v ...interface{}) error {
 	trace("checking for stale files ready for cleanup...")
 
 	if s.latestRevision == nil {

@@ -16,6 +16,7 @@ import (
 
 type WebServer struct {
 	env            *service.Environment
+	settings       Settings
 	httpsServer    *https.HTTPSServer
 	repository     repository.Repository
 	latestRevision *Revision
@@ -33,7 +34,11 @@ func NewWebServer(env *service.Environment, config *Config) (server *WebServer, 
 	}
 
 	if config == nil {
-		return nil, errors.New("invalid configuration object: null")
+		return nil, errors.New("config cannot be null")
+	}
+
+	if err := config.Settings.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid setting: %v", err)
 	}
 
 	logger, err := util.NewFileLog(env.PrimaryLogPath())
@@ -50,6 +55,7 @@ func NewWebServer(env *service.Environment, config *Config) (server *WebServer, 
 
 	webServer := &WebServer{
 		env:         env,
+		settings:    config.Settings,
 		httpsServer: httpsServer,
 		logger:      logger,
 	}
@@ -112,16 +118,52 @@ func (s *WebServer) listenAndServeInternal() {
 }
 
 func (s *WebServer) startPeriodicTasks() {
+	// Increment by 1 when implementing a new periodic task.
 	const N = 2
+
 	s.taskWaitGroup = &sync.WaitGroup{}
+	s.taskWaitGroup.Add(N)
+
 	s.stopChannels = make([]chan struct{}, N)
 	for i := range s.stopChannels {
 		s.stopChannels[i] = make(chan struct{})
 	}
 
-	s.taskWaitGroup.Add(N)
-	go s.genericPeriodicTask(s.checkForNewRevision, 15*time.Minute, s.stopChannels[0], RepositoryTag)
-	go s.genericPeriodicTask(s.cleanUpCompiledFiles, 24*time.Hour, s.stopChannels[1], CleanupTag)
+	taskN := 0
+	startTask := func(task service.Task, period time.Duration, tag TraceTag, v ...interface{}) {
+		if taskN == N {
+			panic(s.error("attempted to start too many periodic tasks"))
+		}
+		go s.genericPeriodicTask(task, period, s.stopChannels[taskN], tag, v...)
+		taskN++
+	}
+
+	// Start all periodic tasks from here.
+	startTask(s.syncRepository, s.settings.RepositorySyncPeriodDur, RepositoryTag)
+	startTask(s.cleanUpStaleFiles, s.settings.StaleFileCleanupPeriodDur, CleanupTag)
+
+	if taskN != N {
+		panic(s.error("not enough periodic tasks started: expected %d, started %d", N, taskN))
+	}
+}
+
+func (s *WebServer) genericPeriodicTask(task service.Task, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
+	s.log("starting periodic task [%s]", tag)
+	trace := s.generateTraceCallback(tag)
+	ticker := time.NewTicker(period)
+	for {
+		select {
+		case <-ticker.C:
+			err := task(trace, v...)
+			if err != nil {
+				s.error("periodic task [%s] failed with error: %v", tag, err)
+			}
+		case <-stop:
+			s.taskWaitGroup.Done()
+			s.log("periodic task [%s] stopped", tag)
+			return
+		}
+	}
 }
 
 func (s *WebServer) stopPeriodicTasks() {
@@ -129,23 +171,4 @@ func (s *WebServer) stopPeriodicTasks() {
 		close(task)
 	}
 	s.taskWaitGroup.Wait()
-}
-
-func (s *WebServer) genericPeriodicTask(f func(service.TraceCallback, ...interface{}) error, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
-	s.log("starting timer task %s", tag)
-	trace := s.generateTraceCallback(tag)
-	ticker := time.NewTicker(period)
-	for {
-		select {
-		case <-ticker.C:
-			err := f(trace, v...)
-			if err != nil {
-				s.error("timer task %s failed with error: %v", tag, err)
-			}
-		case <-stop:
-			s.taskWaitGroup.Done()
-			s.log("timer task %s stopped", tag)
-			return
-		}
-	}
 }
