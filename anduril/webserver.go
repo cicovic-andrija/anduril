@@ -148,7 +148,7 @@ func (s *WebServer) startPeriodicTasks() {
 }
 
 func (s *WebServer) genericPeriodicTask(task service.Task, period time.Duration, stop chan struct{}, tag TraceTag, v ...interface{}) {
-	s.log("starting periodic task [%s]", tag)
+	s.log("starting periodic task [%s] with period of %v", tag, period)
 	trace := s.generateTraceCallback(tag)
 	ticker := time.NewTicker(period)
 	for {

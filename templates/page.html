@@ -62,39 +62,31 @@
                 </div>
                 {{ end }}
                 {{ else }}
-                {{ range .RedHighlightedTags }}
-                    <h4><span class="badge bg-danger">{{ . }}</span></h4>
-                {{ end }}
-                    {{ template "articleContent" . }}
+                {{ template "articleContent" . }}
                 {{ end }}
                 </div>
 
+                <!-- Tag sidebar on the right -->
                 {{ if .IsTagListVisible }}
-                <!-- Tag sidebar (list of tags) on the right -->
-                <div class="col-lg-2 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
-                    <a href="/tags"
-                        class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
-                        <span class="fs-5">Tags</span>
-                    </a>
-                    <div class="list-group list-group-flush border-bottom scrollarea">
-                        {{ range .Tags }}
-                        <a href="/tags/{{ . }}" class="list-group-item list-group-item-action py-3 lh-tight">
-                            <div class="d-flex w-100 align-items-center justify-content-between">
-                                <h5 class="mb-1">
-                                    <span class="badge {{ if $.IsHighlighted . }} {{ if $.ShouldHighlightRed . }} bg-danger {{ else }} bg-primary {{ end }} {{ else }} bg-secondary {{ end }}">{{ . }}</span>
-                                </h5>
-                            </div>
-                        </a>
-                        {{ end }}
-                    </div>
+                <div class="col-lg-2 pt-3 pt-lg-0 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
+                    {{ if .HighlightedTags }}
+                    <h1>Tags</h1>
+                    {{ range .HighlightedTags }}
+                    <h5 class="pt-1"><a {{ if $.ShouldHighlightRed . }}style="color: red;"{{ else }}style="color: green;"{{ end }} href="/tags/{{ . }}">{{ . }}</a>{{ if $.ShouldHighlightRed . }} ⚠ {{ else }} ✓ {{ end }}</h5>
+                    {{ end }}
+                    {{ end }}
+                    <h1>{{ if .HighlightedTags }}All tags{{ else }}Tags{{ end }}</h1>
+                    {{ range .Tags }}
+                    <h5 class="pt-1"><a href="/tags/{{ . }}">{{ . }}</a></h5>
+                    {{ end }}
                 </div>
                 {{ end }}
 
                 {{ if and .ShowArticleListInsteadOfContent (not .IsTagListVisible) }}
-                <div class="col-lg-5">
+                <div class="col-lg-5 pt-3 pt-lg-0 ">
                     <h1>&nbsp;</h1>
                     {{ range .InterestingTopics }}
-                    <h3>{{ .Title }}</h3>
+                    <h3 class="pt-3">{{ .Title }}</h3>
                     <blockquote><p>{{ .Description }}</p></blockquote>
                     {{ range .Articles }}
                     <h5><a href="/articles/{{ .Key }}">{{ .Title }}</a></h5>

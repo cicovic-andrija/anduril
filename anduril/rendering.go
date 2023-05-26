@@ -34,16 +34,6 @@ func (p *Page) IsHighlighted(tag string) bool {
 	return false
 }
 
-func (p *Page) RedHighlightedTags() []string {
-	var reds []string = nil
-	for _, highlighted := range p.HighlightedTags {
-		if p.ShouldHighlightRed(highlighted) {
-			reds = append(reds, highlighted)
-		}
-	}
-	return reds
-}
-
 func (p *Page) ShouldHighlightRed(tag string) bool {
 	return tag == DraftTag || tag == OutdatedTag
 }
