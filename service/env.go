@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,10 +17,22 @@ const (
 	MarkdownHTMLConverter = "pandoc"
 )
 
+// Command-line options and their values.
+const (
+	ConfigOption     = "config"
+	ConfigDataOption = "config-data"
+
+	ConfigDataPlaintext = "plaintext"
+	ConfigDataEncrypted = "encrypted"
+	ConfigDataValid     = ConfigDataPlaintext + "|" + ConfigDataEncrypted
+)
+
 type Environment struct {
-	wd    string
-	pid   int
-	initd bool
+	initd           bool
+	pid             int
+	wd              string
+	configPath      string
+	encryptedConfig bool
 }
 
 func ReadEnvironment() (*Environment, error) {
@@ -31,15 +44,19 @@ func ReadEnvironment() (*Environment, error) {
 		return nil, errors.New("unsupported OS")
 	}
 
-	if _, err := exec.LookPath(MarkdownHTMLConverter); err != nil {
-		return nil, fmt.Errorf("dependency not found on the system: %s", MarkdownHTMLConverter)
-	}
-
 	env.pid = os.Getpid()
 	if exe, err := os.Executable(); err == nil {
 		env.wd = filepath.Dir(exe)
 	} else {
 		return nil, err
+	}
+
+	if err := env.parseCommandLine(); err != nil {
+		return nil, fmt.Errorf("invalid argument: %v", err)
+	}
+
+	if _, err := exec.LookPath(MarkdownHTMLConverter); err != nil {
+		return nil, fmt.Errorf("dependency not found on the system: %s", MarkdownHTMLConverter)
 	}
 
 	if exists, _ := util.DirectoryExists(env.DataDirectoryPath()); !exists {
@@ -77,6 +94,14 @@ func (env *Environment) WDP() string {
 	return env.wd
 }
 
+func (env *Environment) ConfigPath() string {
+	return env.configPath
+}
+
+func (env *Environment) ConfigEncrypted() bool {
+	return env.encryptedConfig
+}
+
 func (env *Environment) DataDirectoryPath() string {
 	return filepath.Join(env.wd, "data")
 }
@@ -87,10 +112,6 @@ func (env *Environment) WorkDirectoryPath() string {
 
 func (env *Environment) LogsDirectoryPath() string {
 	return filepath.Join(env.wd, "logs")
-}
-
-func (env *Environment) ConfigPath() string {
-	return filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
 }
 
 func (env *Environment) PrimaryLogPath() string {
@@ -115,4 +136,38 @@ func (env *Environment) CompiledWorkDirectory() string {
 
 func (env *Environment) CompiledTemplatePath(templateName string) string {
 	return filepath.Join(env.CompiledWorkDirectory(), templateName)
+}
+
+func (env *Environment) parseCommandLine() error {
+	var (
+		configData string
+	)
+
+	flag.StringVar(
+		&env.configPath,
+		ConfigOption,
+		"",
+		"config file full path",
+	)
+
+	flag.StringVar(
+		&configData,
+		ConfigDataOption,
+		ConfigDataPlaintext,
+		fmt.Sprintf("config data format: %s", ConfigDataValid),
+	)
+
+	flag.Parse()
+
+	if env.configPath == "" {
+		env.configPath = filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
+	}
+
+	if !(configData == ConfigDataPlaintext || configData == ConfigDataEncrypted) {
+		return fmt.Errorf("%s: invalid value %q (expected %s)", ConfigDataOption, configData, ConfigDataValid)
+	} else {
+		env.encryptedConfig = configData == ConfigDataEncrypted
+	}
+
+	return nil
 }

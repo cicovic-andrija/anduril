@@ -84,6 +84,7 @@ func (s *WebServer) ListenAndServe() {
 	s.startedAt = time.Now().UTC()
 	s.log("pid: %d", s.env.PID())
 	s.log("working directory: %s", s.env.WDP())
+	s.log("config: %s (encrypted=%t)", s.env.ConfigPath(), s.env.ConfigEncrypted())
 	s.log("primary log location: %s", s.logger.LogPath())
 	s.log("HTTPS server log location: %s", s.httpsServer.GetLogPath())
 	s.log("HTTPS requests log location: %s", s.httpsServer.GetRequestsLogPath())
