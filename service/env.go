@@ -94,14 +94,6 @@ func (env *Environment) WDP() string {
 	return env.wd
 }
 
-func (env *Environment) ConfigPath() string {
-	return env.configPath
-}
-
-func (env *Environment) ConfigEncrypted() bool {
-	return env.encryptedConfig
-}
-
 func (env *Environment) DataDirectoryPath() string {
 	return filepath.Join(env.wd, "data")
 }
