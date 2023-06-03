@@ -27,6 +27,12 @@ const (
 	ConfigDataValid     = ConfigDataPlaintext + "|" + ConfigDataEncrypted
 )
 
+// Variables set during linking.
+var (
+	version string
+	build   string
+)
+
 type Environment struct {
 	initd           bool
 	pid             int

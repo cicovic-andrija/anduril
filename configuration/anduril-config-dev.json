@@ -1,10 +1,10 @@
 {
     "https": {
         "network": {
-            "ip_accept_host": "any",
-            "tcp_port": 443,
-            "tls_cert_path": "/etc/letsencrypt/live/notes.acicovic.me/fullchain.pem",
-            "tls_key_path": "/etc/letsencrypt/live/notes.acicovic.me/privkey.pem"
+            "ip_accept_host": "localhost",
+            "tcp_port": 8080,
+            "tls_cert_path": "tlspublic.crt",
+            "tls_key_path": "tlsprivate.key"
         },
         "enable_file_server": true,
         "file_server": {
@@ -29,7 +29,13 @@
         "relative_content_path": "notes",
         "ssh_auth": {
             "user": "git",
-            "private_key_path": ""
+            "private_key_path": "gitprivate.key"
         }
+    },
+    "settings": {
+        "publish_private_articles": false,
+        "publish_personal_articles": true,
+        "repository_sync_period": "15s",
+        "stale_file_cleanup_period": "1h"
     }
 }

@@ -3,24 +3,44 @@
 
 VERSION = v1.0
 BUILD = $(shell git rev-parse --short HEAD)
-OUT_DIR = out
+OUTPUT_DIR = out
 SERVER_BIN = anduril-server
 
 .PHONY: build
-build: | $(OUT_DIR)
-	@echo $(VERSION)-$(BUILD)
-	go build -v -ldflags "-X github.com/cicovic-andrija/anduril/service/pass=$(VERSION)-$(BUILD)" -o $(OUT_DIR)/$(SERVER_BIN) main.go
+build: | $(OUTPUT_DIR)
+	go build -v \
+		-ldflags "-X github.com/cicovic-andrija/anduril/service/version=$(VERSION) -X github.com/cicovic-andrija/anduril/service/build=$(BUILD)" \
+		-o $(OUTPUT_DIR)/$(SERVER_BIN) main.go
 
-.PHONY: confenc
-confenc: | $(OUT_DIR)
-	go build -ldflags "-X github.com/cicovic-andrija/anduril/service.pass=$(VERSION)-$(BUILD)" -o $(OUT_DIR)/$@ ./$@/...
+.PHONY: tools
+tools: | $(OUTPUT_DIR)
+	go build -o $(OUTPUT_DIR)/test-crypto ./tools/test-crypto.go
 
-$(OUT_DIR):
-	mkdir -p $(OUT_DIR)
+.PHONY: all
+all: $(OUTPUT_DIR) build tools
+
+.PHONY: devenv
+devenv: build
+	mkdir -p $(OUTPUT_DIR)/data
+	cp -r templates $(OUTPUT_DIR)/data
+	cp -r static $(OUTPUT_DIR)/data
+	cp configuration/anduril-config-dev.json $(OUTPUT_DIR)/data/anduril-config.json
+	openssl req \
+		-x509 \
+		-newkey rsa:4096 \
+		-sha256 \
+		-days 365 \
+		-nodes \
+		-out $(OUTPUT_DIR)/tlspublic.crt \
+		-keyout $(OUTPUT_DIR)/tlsprivate.key \
+		-subj "/CN=localhost/C=/ST=/L=/O=/OU="
+
+$(OUTPUT_DIR):
+	mkdir -p $(OUTPUT_DIR)
 
 .PHONY: clean
 clean:
-	rm -rf $(OUT_DIR)
+	rm -rf $(OUTPUT_DIR)
 
 .PHONY: tidy
 tidy:

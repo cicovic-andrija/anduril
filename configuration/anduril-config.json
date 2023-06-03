@@ -1,0 +1,41 @@
+{
+    "https": {
+        "network": {
+            "ip_accept_host": "any",
+            "tcp_port": 443,
+            "tls_cert_path": "/etc/letsencrypt/live/notes.acicovic.me/fullchain.pem",
+            "tls_key_path": "/etc/letsencrypt/live/notes.acicovic.me/privkey.pem"
+        },
+        "enable_file_server": true,
+        "file_server": {
+            "directory": "static",
+            "url_prefix": "/static/",
+            "allowed": [
+                "frontendProcessing.js",
+                "stylesheet.css",
+                "bootstrap.bundle.min.js",
+                "bootstrap.min.css"
+            ]
+        },
+        "log_requests": true,
+        "allow_only_get_requests": true
+    },
+    "repository": {
+        "protocol": "ssh",
+        "host": "github.com",
+        "repo_url_path": "/cicovic-andrija/notes.git",
+        "remote": "origin",
+        "branch": "master",
+        "relative_content_path": "notes",
+        "ssh_auth": {
+            "user": "git",
+            "private_key_path": ""
+        }
+    },
+    "settings": {
+        "publish_private_articles": false,
+        "publish_personal_articles": true,
+        "repository_sync_period": "5m",
+        "stale_file_cleanup_period": "24h"
+    }
+}
