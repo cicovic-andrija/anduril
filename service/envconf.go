@@ -16,7 +16,7 @@ func (env *Environment) ConfigInfo() string {
 }
 
 func (env *Environment) UnmarshalConfig(v interface{}) error {
-	if env.encryptedConfig { // encrypted
+	if env.encryptedConfig {
 		encodedBytes, err := os.ReadFile(env.configPath)
 		if err != nil {
 			return err

@@ -1,8 +1,6 @@
 # Makefile for Go module github.com/cicovic-andrija/anduril
 #
 
-VERSION = v1.0.0-b6c0821
-BUILD = 94364bb8-7f08-43c5-aaca-42ec17ea18b4
 OUTPUT_DIR = out
 SERVER_BIN = anduril-server
 MKCONF_PATH = $(OUTPUT_DIR)/mkconf
@@ -27,8 +25,8 @@ devenv: build tools
 		--template configuration/anduril-config.json \
 		--to $(OUTPUT_DIR)/data/encrypted-config.txt \
 		--profile dev \
-		--password $(VERSION) \
-		--salt $(BUILD) \
+		--password v1.0.0-b6c0821 \
+		--salt 94364bb8-7f08-43c5-aaca-42ec17ea18b4 \
 		--decrypt
 	openssl req \
 		-x509 \
