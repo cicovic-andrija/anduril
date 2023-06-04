@@ -10,8 +10,8 @@ import (
 
 	"github.com/cicovic-andrija/anduril/repository"
 	"github.com/cicovic-andrija/anduril/service"
-	"github.com/cicovic-andrija/go-util"
-	"github.com/cicovic-andrija/https"
+	"github.com/cicovic-andrija/libgo/https"
+	"github.com/cicovic-andrija/libgo/logging"
 )
 
 type WebServer struct {
@@ -24,7 +24,7 @@ type WebServer struct {
 	executor       *Executor
 	taskWaitGroup  *sync.WaitGroup
 	stopChannels   []chan struct{}
-	logger         *util.FileLog
+	logger         *logging.FileLog
 	startedAt      time.Time
 }
 
@@ -41,7 +41,7 @@ func NewWebServer(env *service.Environment, config *Config) (server *WebServer, 
 		return nil, fmt.Errorf("invalid setting: %v", err)
 	}
 
-	logger, err := util.NewFileLog(env.PrimaryLogPath())
+	logger, err := logging.NewFileLog(env.PrimaryLogPath())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create primary log file: %v", err)
 	}

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/cicovic-andrija/go-util"
+	"github.com/cicovic-andrija/libgo/fs"
 )
 
 // External programs.
@@ -65,7 +65,7 @@ func ReadEnvironment() (*Environment, error) {
 		return nil, fmt.Errorf("dependency not found on the system: %s", MarkdownHTMLConverter)
 	}
 
-	if exists, _ := util.DirectoryExists(env.DataDirectoryPath()); !exists {
+	if exists, _ := fs.DirectoryExists(env.DataDirectoryPath()); !exists {
 		return env, fmt.Errorf("directory not found: %s", env.DataDirectoryPath())
 	}
 
@@ -79,7 +79,7 @@ func (env *Environment) Initialize() error {
 		env.RepositoryWorkingDirectory(),
 		env.CompiledWorkDirectory(),
 	} {
-		if err := util.MkdirIfNotExists(directory); err != nil {
+		if err := fs.MkdirIfNotExists(directory); err != nil {
 			return err
 		}
 	}

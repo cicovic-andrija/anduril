@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cicovic-andrija/go-util"
+	"github.com/cicovic-andrija/libgo/fs"
 )
 
 func (env *Environment) ConfigInfo() string {
@@ -28,7 +28,7 @@ func (env *Environment) UnmarshalConfig(v interface{}) error {
 		// 	stream := cipher.NewCFBDecrypter(block, iv)
 		// }
 	} else { // plaintext
-		if fhPlaintext, err := util.OpenFile(env.configPath); err != nil {
+		if fhPlaintext, err := fs.OpenFile(env.configPath); err != nil {
 			return err
 		} else {
 			defer fhPlaintext.Close()

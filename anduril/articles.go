@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/cicovic-andrija/anduril/yfm"
-	"github.com/cicovic-andrija/go-util"
+	"github.com/cicovic-andrija/libgo/fs"
 )
 
 // Structures and routines for processing data files (articles) in markdown format.
@@ -38,7 +38,7 @@ type Article struct {
 }
 
 func (s *WebServer) processRevision(revision *Revision) error {
-	if err := util.EnumerateDirectory(
+	if err := fs.EnumerateDirectory(
 		revision.ContainerPath,
 		func(fileName string) {
 			if !strings.HasSuffix(fileName, MarkdownExtension) {
@@ -76,7 +76,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 }
 
 func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
-	file, err := util.OpenFile(filepath.Join(revision.ContainerPath, fileName))
+	file, err := fs.OpenFile(filepath.Join(revision.ContainerPath, fileName))
 	if err != nil {
 		return err
 	}

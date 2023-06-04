@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/cicovic-andrija/https"
+	"github.com/cicovic-andrija/libgo/https"
 )
 
 func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {

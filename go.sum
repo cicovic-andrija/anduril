@@ -9,10 +9,8 @@ github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be/go.mod h1:ySMOLuW
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/bwesterb/go-ristretto v1.2.0/go.mod h1:fUIoIZaG73pV5biE2Blr2xEzDoMj7NFEuV9ekS419A0=
-github.com/cicovic-andrija/go-util v0.1.0 h1:ebnBX2WqHwdJYHu2QVGxn0cvaErFGRdlF5ITKl0RQqc=
-github.com/cicovic-andrija/go-util v0.1.0/go.mod h1:nUS48JKw07U+xQJwZFNdHqC1efYHTJXIp1+nKF9rfkk=
-github.com/cicovic-andrija/https v0.2.0 h1:zrht4FaY+IzmOSKAQhrPf1k5waTCb4DuOUmjzNvrTyE=
-github.com/cicovic-andrija/https v0.2.0/go.mod h1:nWFRB/dMg+B1jpUG4SLm47qzeuaoCoZP1xbfS3PxJx0=
+github.com/cicovic-andrija/libgo v1.0.0 h1:kvDc7anTEu9M2nmTHxj7dMI/0nUueJPTdqBdkOEwIVs=
+github.com/cicovic-andrija/libgo v1.0.0/go.mod h1:AKr8r/DUUDB8P+t/f8DgvlZBlAfmwwp7VR3/RpnnWeg=
 github.com/cloudflare/circl v1.1.0 h1:bZgT/A+cikZnKIwn7xL2OBj012Bmvho/o6RpRvv3GKY=
 github.com/cloudflare/circl v1.1.0/go.mod h1:prBCrKB9DV4poKZY1l9zBXg2QJY7mvgRvtMxxK7fi4I=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

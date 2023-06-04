@@ -33,7 +33,8 @@ devenv: build
 		-nodes \
 		-out $(OUTPUT_DIR)/tlspublic.crt \
 		-keyout $(OUTPUT_DIR)/tlsprivate.key \
-		-subj "/CN=localhost/C=/ST=/L=/O=/OU="
+		-subj "/CN=localhost/C=/ST=/L=/O=/OU=" \
+		>/dev/null 2>/dev/null
 
 $(OUTPUT_DIR):
 	mkdir -p $(OUTPUT_DIR)

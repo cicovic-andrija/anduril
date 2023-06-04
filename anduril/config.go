@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cicovic-andrija/anduril/repository"
-	"github.com/cicovic-andrija/https"
+	"github.com/cicovic-andrija/libgo/https"
 )
 
 type Config struct {
