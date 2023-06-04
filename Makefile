@@ -1,30 +1,35 @@
 # Makefile for Go module github.com/cicovic-andrija/anduril
 #
 
-VERSION = v1.1-$(shell git rev-parse --short HEAD)
-BUILD = $(shell uuidgen)
+VERSION = v1.0.0-b6c0821
+BUILD = 94364bb8-7f08-43c5-aaca-42ec17ea18b4
 OUTPUT_DIR = out
 SERVER_BIN = anduril-server
+MKCONF_PATH = $(OUTPUT_DIR)/mkconf
 
 .PHONY: build
 build: | $(OUTPUT_DIR)
-	go build -v \
-		-ldflags "-X github.com/cicovic-andrija/anduril/service/version=$(VERSION) -X github.com/cicovic-andrija/anduril/service/build=$(BUILD)" \
-		-o $(OUTPUT_DIR)/$(SERVER_BIN) main.go
+	go build -o $(OUTPUT_DIR)/$(SERVER_BIN) main.go
 
 .PHONY: tools
 tools: | $(OUTPUT_DIR)
-	go build -o $(OUTPUT_DIR)/mkconf ./tools/mkconf
+	go build -o $(MKCONF_PATH) ./tools/mkconf.go
 
 .PHONY: all
 all: $(OUTPUT_DIR) build tools
 
 .PHONY: devenv
-devenv: build
+devenv: build tools
 	mkdir -p $(OUTPUT_DIR)/data
 	cp -r templates $(OUTPUT_DIR)/data
 	cp -r static $(OUTPUT_DIR)/data
-	cp configuration/anduril-config-dev.json $(OUTPUT_DIR)/data/anduril-config.json
+	$(MKCONF_PATH) \
+		--template configuration/anduril-config.json \
+		--to $(OUTPUT_DIR)/data/encrypted-config.txt \
+		--profile dev \
+		--password $(VERSION) \
+		--salt $(BUILD) \
+		--decrypt
 	openssl req \
 		-x509 \
 		-newkey rsa:4096 \
@@ -41,7 +46,12 @@ $(OUTPUT_DIR):
 
 .PHONY: clean
 clean:
-	rm -rf $(OUTPUT_DIR)
+	rm -rf $(OUTPUT_DIR)/logs
+	rm -rf $(OUTPUT_DIR)/work
+	rm -rf $(OUTPUT_DIR)/data
+	rm -f $(OUTPUT_DIR)/tls*
+	rm -f $(OUTPUT_DIR)/$(SERVER_BIN)
+	rm -f $(MKCONF_PATH)
 
 .PHONY: tidy
 tidy:

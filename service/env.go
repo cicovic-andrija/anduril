@@ -19,18 +19,15 @@ const (
 
 // Command-line options and their values.
 const (
-	ConfigOption     = "config"
-	ConfigDataOption = "config-data"
-
-	ConfigDataPlaintext = "plaintext"
-	ConfigDataEncrypted = "encrypted"
-	ConfigDataValid     = ConfigDataPlaintext + "|" + ConfigDataEncrypted
+	ConfigOption    = "config"
+	EncryptedOption = "encrypted"
 )
 
-// Variables set during linking.
+// Version and build.
+// TODO: Thid could be set at link-time but -X linker option wasn't doing the trick. Investigate.
 var (
-	version string
-	build   string
+	Version = "v1.0.0-b6c0821"
+	Build   = "94364bb8-7f08-43c5-aaca-42ec17ea18b4"
 )
 
 type Environment struct {
@@ -137,10 +134,6 @@ func (env *Environment) CompiledTemplatePath(templateName string) string {
 }
 
 func (env *Environment) parseCommandLine() error {
-	var (
-		configData string
-	)
-
 	flag.StringVar(
 		&env.configPath,
 		ConfigOption,
@@ -148,23 +141,21 @@ func (env *Environment) parseCommandLine() error {
 		"config file full path",
 	)
 
-	flag.StringVar(
-		&configData,
-		ConfigDataOption,
-		ConfigDataPlaintext,
-		fmt.Sprintf("config data format: %s", ConfigDataValid),
+	flag.BoolVar(
+		&env.encryptedConfig,
+		EncryptedOption,
+		false,
+		"encrypted config indicator",
 	)
 
 	flag.Parse()
 
 	if env.configPath == "" {
-		env.configPath = filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
-	}
-
-	if !(configData == ConfigDataPlaintext || configData == ConfigDataEncrypted) {
-		return fmt.Errorf("%s: invalid value %q (expected %s)", ConfigDataOption, configData, ConfigDataValid)
-	} else {
-		env.encryptedConfig = configData == ConfigDataEncrypted
+		if env.encryptedConfig {
+			env.configPath = filepath.Join(env.DataDirectoryPath(), "encrypted-config.txt")
+		} else {
+			env.configPath = filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
+		}
 	}
 
 	return nil
