@@ -7,7 +7,7 @@ Type=simple
 Restart=always
 User=root
 WorkingDirectory=/srv/anduril
-ExecStart=/srv/anduril/anduril-server
+ExecStart=/srv/anduril/anduril-server --encrypted --config /srv/anduril/data/encrypted-config.txt
 StandardOutput=syslog
 StandardError=syslog
 
