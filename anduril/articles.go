@@ -10,6 +10,7 @@ import (
 
 	"github.com/cicovic-andrija/anduril/yfm"
 	"github.com/cicovic-andrija/libgo/fs"
+	"github.com/cicovic-andrija/libgo/slice"
 )
 
 // Structures and routines for processing data files (articles) in markdown format.
@@ -90,11 +91,11 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 		return fmt.Errorf("failed to parse metadata: %v", err)
 	}
 
-	if !s.settings.PublishPrivateArticles && contains(article.Tags, PrivateArticleTag) {
+	if !s.settings.PublishPrivateArticles && slice.ContainsString(article.Tags, PrivateArticleTag) {
 		return nil
 	}
 
-	if !s.settings.PublishPersonalArticles && contains(article.Tags, PersonalArticleTag) {
+	if !s.settings.PublishPersonalArticles && slice.ContainsString(article.Tags, PersonalArticleTag) {
 		return nil
 	}
 
@@ -169,13 +170,4 @@ func (a *Article) LastModificationDateMessage() string {
 
 func VersionedArticleTemplateSuffix(versionHash string) string {
 	return fmt.Sprintf("_%s.html", versionHash)
-}
-
-func contains(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
 }

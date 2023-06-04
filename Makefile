@@ -1,8 +1,8 @@
 # Makefile for Go module github.com/cicovic-andrija/anduril
 #
 
-VERSION = v1.0
-BUILD = $(shell git rev-parse --short HEAD)
+VERSION = v1.1-$(shell git rev-parse --short HEAD)
+BUILD = $(shell uuidgen)
 OUTPUT_DIR = out
 SERVER_BIN = anduril-server
 
@@ -14,7 +14,7 @@ build: | $(OUTPUT_DIR)
 
 .PHONY: tools
 tools: | $(OUTPUT_DIR)
-	go build -o $(OUTPUT_DIR)/test-crypto ./tools/test-crypto.go
+	go build -o $(OUTPUT_DIR)/mkconf ./tools/mkconf
 
 .PHONY: all
 all: $(OUTPUT_DIR) build tools

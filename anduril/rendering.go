@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+
+	"github.com/cicovic-andrija/libgo/slice"
 )
 
 const (
@@ -85,7 +87,7 @@ func (p *Page) InterestingTopics() []*InterestingTopic {
 	for _, topic := range interestingTopics {
 		topic.Articles = []*Article{}
 		for _, article := range p.Articles {
-			if contains(article.Tags, topic.Tag) && !contains(article.Tags, PersonalArticleTag) {
+			if slice.ContainsString(article.Tags, topic.Tag) && !slice.ContainsString(article.Tags, PersonalArticleTag) {
 				topic.Articles = append(topic.Articles, article)
 			}
 		}
