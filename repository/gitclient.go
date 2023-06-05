@@ -164,5 +164,10 @@ func (r *GitRepository) authMethod() (transport.AuthMethod, error) {
 	if r.Protocol != SSHProtocol {
 		return nil, nil
 	}
-	return ssh.NewPublicKeysFromFile(r.SSHAuth.User, r.SSHAuth.PrivateKeyPath, "" /* password */)
+
+	return ssh.NewPublicKeysFromFile(
+		r.SSHAuth.User,
+		r.SSHAuth.PrivateKeyPath,
+		r.SSHAuth.PrivateKeyPassword,
+	)
 }

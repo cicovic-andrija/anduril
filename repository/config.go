@@ -14,7 +14,7 @@ const (
 type Config struct {
 	Protocol            string        `json:"protocol"`
 	Host                string        `json:"host"`
-	RepoURLPath         string        `json:"repo_url_path"`
+	RepoPath            string        `json:"repo_path"`
 	Remote              string        `json:"remote"`
 	Branch              string        `json:"branch"`
 	RelativeContentPath string        `json:"relative_content_path"`
@@ -26,9 +26,10 @@ type SSHAuthConfig struct {
 	User string `json:"user"`
 
 	// Absolute path to the private key file for SSH authentication of the User.
-	// Note: Currently, only non-encrypted PEM keys are supported, so ensure that the
-	// key has read-only level of access in the repository.
 	PrivateKeyPath string `json:"private_key_path"`
+
+	// Password protecting the private key.
+	PrivateKeyPassword string `json:"private_key_password"`
 }
 
 func (c *Config) URL() string {
@@ -42,7 +43,7 @@ func (c *Config) URL() string {
 		c.Protocol,
 		userPart,
 		c.Host,
-		strings.TrimPrefix(c.RepoURLPath, "/"),
+		strings.TrimPrefix(c.RepoPath, "/"),
 	)
 }
 
