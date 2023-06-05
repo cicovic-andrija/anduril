@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/cicovic-andrija/anduril/yfm"
-	"github.com/cicovic-andrija/go-util"
+	"github.com/cicovic-andrija/libgo/fs"
+	"github.com/cicovic-andrija/libgo/slice"
 )
 
 // Structures and routines for processing data files (articles) in markdown format.
@@ -38,7 +39,7 @@ type Article struct {
 }
 
 func (s *WebServer) processRevision(revision *Revision) error {
-	if err := util.EnumerateDirectory(
+	if err := fs.EnumerateDirectory(
 		revision.ContainerPath,
 		func(fileName string) {
 			if !strings.HasSuffix(fileName, MarkdownExtension) {
@@ -76,7 +77,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 }
 
 func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
-	file, err := util.OpenFile(filepath.Join(revision.ContainerPath, fileName))
+	file, err := fs.OpenFile(filepath.Join(revision.ContainerPath, fileName))
 	if err != nil {
 		return err
 	}
@@ -90,11 +91,11 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 		return fmt.Errorf("failed to parse metadata: %v", err)
 	}
 
-	if !s.settings.PublishPrivateArticles && contains(article.Tags, PrivateArticleTag) {
+	if !s.settings.PublishPrivateArticles && slice.ContainsString(article.Tags, PrivateArticleTag) {
 		return nil
 	}
 
-	if !s.settings.PublishPersonalArticles && contains(article.Tags, PersonalArticleTag) {
+	if !s.settings.PublishPersonalArticles && slice.ContainsString(article.Tags, PersonalArticleTag) {
 		return nil
 	}
 
@@ -169,13 +170,4 @@ func (a *Article) LastModificationDateMessage() string {
 
 func VersionedArticleTemplateSuffix(versionHash string) string {
 	return fmt.Sprintf("_%s.html", versionHash)
-}
-
-func contains(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
 }

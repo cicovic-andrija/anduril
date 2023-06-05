@@ -1,6 +1,8 @@
 package anduril
 
-import "github.com/cicovic-andrija/anduril/service"
+import (
+	"github.com/cicovic-andrija/anduril/service"
+)
 
 func Run() {
 	env, err := service.ReadEnvironment()
@@ -13,7 +15,8 @@ func Run() {
 		panic(err)
 	}
 
-	config, err := ReadConfig(env.ConfigPath())
+	config := &Config{}
+	err = env.UnmarshalConfig(config)
 	if err != nil {
 		panic(err)
 	}

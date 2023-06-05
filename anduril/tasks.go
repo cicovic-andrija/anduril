@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/cicovic-andrija/anduril/service"
-	"github.com/cicovic-andrija/go-util"
+	"github.com/cicovic-andrija/libgo/fs"
 )
 
 func (s *WebServer) syncRepository(trace service.TraceCallback, v ...interface{}) error {
@@ -71,7 +71,7 @@ func (s *WebServer) cleanUpStaleFiles(trace service.TraceCallback, v ...interfac
 	failed := []string{}
 	cleanedUp := 0
 
-	if err := util.EnumerateDirectory(
+	if err := fs.EnumerateDirectory(
 		filepath.Join(s.env.CompiledWorkDirectory()),
 		func(fileName string) {
 			if !strings.HasSuffix(fileName, latestVersionSuffix) {

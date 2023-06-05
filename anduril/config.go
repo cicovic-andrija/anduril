@@ -1,13 +1,11 @@
 package anduril
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/cicovic-andrija/anduril/repository"
-	"github.com/cicovic-andrija/go-util"
-	"github.com/cicovic-andrija/https"
+	"github.com/cicovic-andrija/libgo/https"
 )
 
 type Config struct {
@@ -23,19 +21,6 @@ type Settings struct {
 	RepositorySyncPeriodDur   time.Duration `json:"-"`
 	StaleFileCleanupPeriod    string        `json:"stale_file_cleanup_period"`
 	StaleFileCleanupPeriodDur time.Duration `json:"-"`
-}
-
-func ReadConfig(path string) (*Config, error) {
-	config := &Config{}
-	if configFile, err := util.OpenFile(path); err != nil {
-		return nil, err
-	} else {
-		defer configFile.Close()
-		if err = json.NewDecoder(configFile).Decode(config); err != nil {
-			return nil, err
-		}
-	}
-	return config, nil
 }
 
 func (s *Settings) Validate() error {

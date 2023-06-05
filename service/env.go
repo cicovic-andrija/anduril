@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/cicovic-andrija/go-util"
+	"github.com/cicovic-andrija/libgo/fs"
 )
 
 // External programs.
@@ -19,12 +19,15 @@ const (
 
 // Command-line options and their values.
 const (
-	ConfigOption     = "config"
-	ConfigDataOption = "config-data"
+	ConfigOption    = "config"
+	EncryptedOption = "encrypted"
+)
 
-	ConfigDataPlaintext = "plaintext"
-	ConfigDataEncrypted = "encrypted"
-	ConfigDataValid     = ConfigDataPlaintext + "|" + ConfigDataEncrypted
+// Version and build.
+// TODO: Thid could be set at link-time but -X linker option wasn't doing the trick. Investigate.
+var (
+	Version = "v1.0.0-b6c0821"
+	Build   = "94364bb8-7f08-43c5-aaca-42ec17ea18b4"
 )
 
 type Environment struct {
@@ -59,7 +62,7 @@ func ReadEnvironment() (*Environment, error) {
 		return nil, fmt.Errorf("dependency not found on the system: %s", MarkdownHTMLConverter)
 	}
 
-	if exists, _ := util.DirectoryExists(env.DataDirectoryPath()); !exists {
+	if exists, _ := fs.DirectoryExists(env.DataDirectoryPath()); !exists {
 		return env, fmt.Errorf("directory not found: %s", env.DataDirectoryPath())
 	}
 
@@ -73,7 +76,7 @@ func (env *Environment) Initialize() error {
 		env.RepositoryWorkingDirectory(),
 		env.CompiledWorkDirectory(),
 	} {
-		if err := util.MkdirIfNotExists(directory); err != nil {
+		if err := fs.MkdirIfNotExists(directory); err != nil {
 			return err
 		}
 	}
@@ -92,14 +95,6 @@ func (env *Environment) PID() int {
 
 func (env *Environment) WDP() string {
 	return env.wd
-}
-
-func (env *Environment) ConfigPath() string {
-	return env.configPath
-}
-
-func (env *Environment) ConfigEncrypted() bool {
-	return env.encryptedConfig
 }
 
 func (env *Environment) DataDirectoryPath() string {
@@ -139,10 +134,6 @@ func (env *Environment) CompiledTemplatePath(templateName string) string {
 }
 
 func (env *Environment) parseCommandLine() error {
-	var (
-		configData string
-	)
-
 	flag.StringVar(
 		&env.configPath,
 		ConfigOption,
@@ -150,23 +141,21 @@ func (env *Environment) parseCommandLine() error {
 		"config file full path",
 	)
 
-	flag.StringVar(
-		&configData,
-		ConfigDataOption,
-		ConfigDataPlaintext,
-		fmt.Sprintf("config data format: %s", ConfigDataValid),
+	flag.BoolVar(
+		&env.encryptedConfig,
+		EncryptedOption,
+		false,
+		"encrypted config indicator",
 	)
 
 	flag.Parse()
 
 	if env.configPath == "" {
-		env.configPath = filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
-	}
-
-	if !(configData == ConfigDataPlaintext || configData == ConfigDataEncrypted) {
-		return fmt.Errorf("%s: invalid value %q (expected %s)", ConfigDataOption, configData, ConfigDataValid)
-	} else {
-		env.encryptedConfig = configData == ConfigDataEncrypted
+		if env.encryptedConfig {
+			env.configPath = filepath.Join(env.DataDirectoryPath(), "encrypted-config.txt")
+		} else {
+			env.configPath = filepath.Join(env.DataDirectoryPath(), "anduril-config.json")
+		}
 	}
 
 	return nil
