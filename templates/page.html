@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ .Title }}</title>
-    <link href="/static/stylesheet.css" rel="stylesheet">
     <link href="/static/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/stylesheet.css" rel="stylesheet">
 </head>
 
 <body onload="postProcessHTML()">
@@ -72,19 +72,19 @@
                     {{ if .HighlightedTags }}
                     <h1>Tags</h1>
                     {{ range .HighlightedTags }}
-                    <h5 class="pt-1"><a {{ if $.ShouldHighlightRed . }}style="color: red;"{{ else }}style="color: green;"{{ end }} href="/tags/{{ . }}">{{ . }}</a>{{ if $.ShouldHighlightRed . }} ⚠ {{ else }} ✓ {{ end }}</h5>
+                    <h5 class="pt-1"><a class="taglink{{ if $.ShouldHighlightRed . }} redtaglink{{ end }}" href="/tags/{{ . }}">{{ . }}</a></h5>
                     {{ end }}
                     {{ end }}
                     <h1>{{ if .HighlightedTags }}All tags{{ else }}Tags{{ end }}</h1>
                     {{ range .Tags }}
-                    <h5 class="pt-1"><a href="/tags/{{ . }}">{{ . }}</a></h5>
+                    <h5 class="pt-1"><a class="taglink" href="/tags/{{ . }}">{{ . }}</a></h5>
                     {{ end }}
                 </div>
                 {{ end }}
 
                 {{ if and .ShowArticleListInsteadOfContent (not .IsTagListVisible) }}
                 <div class="col-lg-5 pt-3 pt-lg-0 ">
-                    <h1>&nbsp;</h1>
+                    <h1>About...</h1>
                     {{ range .InterestingTopics }}
                     <h3 class="pt-3">{{ .Title }}</h3>
                     <blockquote><p>{{ .Description }}</p></blockquote>

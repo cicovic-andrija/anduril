@@ -67,18 +67,18 @@ type InterestingTopic struct {
 
 var interestingTopics = []*InterestingTopic{
 	{
-		Title:       "About programming",
-		Description: "Every piece of writing in one way or another related to software engineering.",
+		Title:       "...programming",
+		Description: "Every piece of writing in any way related to software engineering.",
 		Tag:         "programming",
 	},
 	{
-		Title:       "About diving",
+		Title:       "...diving",
 		Description: "Various references about diving practices and equipment.",
 		Tag:         "diving",
 	},
 	{
-		Title:       "Cheatsheets",
-		Description: "Any product of frustration with search engine optimizations.",
+		Title:       "...writing once, doing frequently",
+		Description: "References, cheatsheets, guides, tables.",
 		Tag:         "how-to",
 	},
 }
