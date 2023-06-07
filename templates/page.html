@@ -1,129 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ .Title }}</title>
-    <link href="/static/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/stylesheet.css" rel="stylesheet">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ .Title }}</title>
+	<link href="/static/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/stylesheet.css" rel="stylesheet">
 </head>
-
 <body onload="postProcessHTML()">
-    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
-        <div class="container">
-            <!-- pb-2 aligns the brand with the other items in the navbar -->
-            <a class="navbar-brand pb-2" href="/">Home</a>
-            <div class="collapse navbar-collapse pb-2 pb-lg-0" id="navbarContent">
-                <ul class="navbar-nav me-auto pb-2 pb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/articles">Articles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/tags">Tags</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/about">About</a>
-                    </li>
-                </ul>
-                <form action="/search" method="GET">
-                    <input id="search-input-box" type="search" name="what" class="form-control" placeholder="Search...">
-                    <input type="submit" hidden />
-                </form>
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
-    </nav>
-
-    <main>
-        <div class="container">
-            <div class="row pt-3">
-                <!-- Empty space to the left on large+ viewports -->
-                <div class="col-lg-1 p-0"></div>
-
-                {{ if .Is404 }}
-                <div class="col-lg">
-                    <h3 class="text-center">Page Not Found (404)</h3>
-                    <p class="text-center text-muted">
-                        The page you requested does not exist.
-                    </p>
-                </div>
-
-                {{ else }}
-                <!-- Article list OR content of a specific article -->
-                <div class="col-lg">
-                {{ if .ShowArticleListInsteadOfContent }}
-                <h1>{{ .ArticleListHeader }}</h1>
-                {{ range .Articles }}
-                <div>
-                    <h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
-                    <h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
-                </div>
-                {{ end }}
-                {{ else }}
-                {{ template "articleContent" . }}
-                {{ end }}
-                </div>
-
-                <!-- Tag sidebar on the right -->
-                {{ if .IsTagListVisible }}
-                <div class="col-lg-2 pt-3 pt-lg-0 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
-                    {{ if .HighlightedTags }}
-                    <h1>Tags</h1>
-                    {{ range .HighlightedTags }}
-                    <h5 class="pt-1"><a class="taglink{{ if $.ShouldHighlightRed . }} redtaglink{{ end }}" href="/tags/{{ . }}">{{ . }}</a></h5>
-                    {{ end }}
-                    {{ end }}
-                    <h1>{{ if .HighlightedTags }}All tags{{ else }}Tags{{ end }}</h1>
-                    {{ range .Tags }}
-                    <h5 class="pt-1"><a class="taglink" href="/tags/{{ . }}">{{ . }}</a></h5>
-                    {{ end }}
-                </div>
-                {{ end }}
-
-                {{ if and .ShowArticleListInsteadOfContent (not .IsTagListVisible) }}
-                <div class="col-lg-5 pt-3 pt-lg-0 ">
-                    <h1>About...</h1>
-                    {{ range .InterestingTopics }}
-                    <h3 class="pt-3">{{ .Title }}</h3>
-                    <blockquote><p>{{ .Description }}</p></blockquote>
-                    {{ range .Articles }}
-                    <h5><a href="/articles/{{ .Key }}">{{ .Title }}</a></h5>
-                    {{ end }}
-                    {{ end }}
-                </div>
-                {{ end }}
-
-                {{ end }}
-
-                <!-- Empty space to the right on large+ viewports -->
-                <div class="col-lg-1 p-0"></div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <div class="container">
-        <div class="row pt-3">
-            <!-- Empty space to the left on large+ viewports -->
-            <div class="col-lg-1 p-0"></div>
-            <div class="col-lg">
-                <hr class="mb-1">
-                <p class="text-start text-muted">
-                    <a href="#"><small>Top</small></a>
-                    {{ if .FooterText }}
-                    <small>&nbsp;|&nbsp;</small>
-                    <small>{{ .FooterText }}</small>
-                    {{ end }}
-                </p>
-            </div>
-            <!-- Empty space to the right on large+ viewports -->
-            <div class="col-lg-1 p-0"></div>
-        </div>
-    </div>
-
-    <script src="/static/frontendProcessing.js"></script>
-    <script src="/static/bootstrap.bundle.min.js"></script>
+	<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+		<div class="container">
+			<!-- pb-2 aligns the brand with the other items in the navbar -->
+			<a class="navbar-brand pb-2" href="/">Home</a>
+			<div class="collapse navbar-collapse pb-2 pb-lg-0" id="navbarContent">
+				<ul class="navbar-nav me-auto pb-2 pb-lg-0">
+					<li class="nav-item">
+						<a class="nav-link" href="/articles">Articles</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/tags">Tags</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/about">About</a>
+					</li>
+				</ul>
+				<form action="/search" method="GET">
+					<input id="search-input-box" type="search" name="what" class="form-control" placeholder="Search...">
+					<input type="submit" hidden />
+				</form>
+			</div>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+		</div>
+	</nav>
+	<!-- PAGE CONTENT BEGIN -->
+	<main>
+		<div class="container">
+			<div class="row pt-3">
+				<div class="col-lg-1 p-0"></div> <!-- Empty space to the left on large+ viewports -->
+				{{ if .Is404 }}
+				<div class="col-lg">
+					<h3 class="text-center">Page Not Found (404)</h3>
+					<p class="text-center text-muted">
+						The page you requested does not exist.
+					</p>
+				</div>
+				{{ else }}
+				<!-- Article lists OR content of one article -->
+				<div class="col-lg container">
+				{{ if .IsArticleListVisible }}
+					<h1>{{ .ArticleListDesignator }}</h1>
+						<div class="row">
+							<div class="col-lg">
+							{{ range .SlicedArticlesFirstPage }}
+									<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+									<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
+							{{ end }}
+							</div>
+							{{ if .IsTagListVisible }}
+							<div class="col-xl-6">
+							{{ else }}
+							<div class="col-lg-6">
+								{{ end }}
+							{{ range .SlicedArticlesSecondPage }}
+									<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+									<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
+							{{ end }}
+							</div>
+						</div>
+				{{ else }}
+					{{ template "articleContent" . }}
+				{{ end }}
+				</div>
+				<!-- Tag sidebar on the right -->
+				{{ if .IsTagListVisible }}
+				<div class="col-lg-2 pt-3 pt-lg-0 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
+				{{ if .HighlightedTags }}
+					<h1>Tags</h1>
+					{{ range .HighlightedTags }}
+					<h5 class="pt-1"><a class="taglink{{ if $.IsHighlightedRed . }} redtaglink{{ end }}" href="/tags/{{ . }}">{{ . }}</a></h5>
+					{{ end }}
+				{{ end }}
+					<h1>{{ if .HighlightedTags }}All tags{{ else }}Tags{{ end }}</h1>
+					{{ range .Tags }}
+					<h5 class="pt-1"><a class="taglink" href="/tags/{{ . }}">{{ . }}</a></h5>
+					{{ end }}
+				</div>
+				{{ end }}
+				{{ end }} <!-- !.Is404 -->
+				<div class="col-lg-1 p-0"></div> <!-- Empty space to the right on large+ viewports -->
+			</div>
+		</div>
+	</main>
+	<!-- PAGE CONTENT END -->
+	<!-- FOOTER BEGIN -->
+	<div class="container">
+		<div class="row pt-3">
+			<div class="col-lg-1 p-0"></div> <!-- Empty space to the left on large+ viewports -->
+			<div class="col-lg">
+				<hr class="mb-1">
+				<p class="text-start text-muted">
+					<a href="#"><small>Top</small></a>
+					{{ if .FooterText }}
+					<small>&nbsp;|&nbsp;</small>
+					<small>{{ .FooterText }}</small>
+					{{ end }}
+				</p>
+			</div>
+			<div class="col-lg-1 p-0"></div> <!-- Empty space to the right on large+ viewports -->
+		</div>
+	</div>
+	<!-- FOOTER END -->
+	<!-- SCRIPT REFS BEGIN -->
+	<script src="/static/frontendProcessing.js"></script>
+	<script src="/static/bootstrap.bundle.min.js"></script>
+	<!-- SCRIPT REFS END -->
 </body>
 </html>

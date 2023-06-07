@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-
-	"github.com/cicovic-andrija/libgo/slice"
 )
 
 const (
@@ -36,11 +34,19 @@ func (p *Page) IsHighlighted(tag string) bool {
 	return false
 }
 
-func (p *Page) ShouldHighlightRed(tag string) bool {
+func (p *Page) SlicedArticlesFirstPage() []*Article {
+	return p.Articles[0 : len(p.Articles)/2+len(p.Articles)%2]
+}
+
+func (p *Page) SlicedArticlesSecondPage() []*Article {
+	return p.Articles[len(p.Articles)/2+len(p.Articles)%2 : len(p.Articles)]
+}
+
+func (p *Page) IsHighlightedRed(tag string) bool {
 	return tag == DraftTag || tag == OutdatedTag
 }
 
-func (p *Page) ShowArticleListInsteadOfContent() bool {
+func (p *Page) IsArticleListVisible() bool {
 	return (len(p.Articles) > 1) || (len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.contentTemplate == "")
 }
 
@@ -48,7 +54,7 @@ func (p *Page) IsTagListVisible() bool {
 	return len(p.Tags) > 0 && !(len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.HighlightedTags[0] == MetaPageTag)
 }
 
-func (p *Page) ArticleListHeader() string {
+func (p *Page) ArticleListDesignator() string {
 	if len(p.HighlightedTags) == 1 {
 		return fmt.Sprintf("Articles tagged %q", p.HighlightedTags[0])
 	} else if len(p.Tags) > 0 {
@@ -56,43 +62,6 @@ func (p *Page) ArticleListHeader() string {
 	} else {
 		return "All articles"
 	}
-}
-
-type InterestingTopic struct {
-	Title       string
-	Description string
-	Tag         string
-	Articles    []*Article
-}
-
-var interestingTopics = []*InterestingTopic{
-	{
-		Title:       "...programming",
-		Description: "Every piece of writing in any way related to software engineering.",
-		Tag:         "programming",
-	},
-	{
-		Title:       "...diving",
-		Description: "Various references about diving practices and equipment.",
-		Tag:         "diving",
-	},
-	{
-		Title:       "...writing once, doing frequently",
-		Description: "References, cheatsheets, guides, tables.",
-		Tag:         "how-to",
-	},
-}
-
-func (p *Page) InterestingTopics() []*InterestingTopic {
-	for _, topic := range interestingTopics {
-		topic.Articles = []*Article{}
-		for _, article := range p.Articles {
-			if slice.ContainsString(article.Tags, topic.Tag) && !slice.ContainsString(article.Tags, PersonalArticleTag) {
-				topic.Articles = append(topic.Articles, article)
-			}
-		}
-	}
-	return interestingTopics
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
