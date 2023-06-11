@@ -25,8 +25,8 @@ devenv: build tools
 		--template configuration/anduril-config.json \
 		--to $(OUTPUT_DIR)/data/encrypted-config.txt \
 		--profile dev \
-		--password v1.0.0-b6c0821 \
-		--salt 94364bb8-7f08-43c5-aaca-42ec17ea18b4 \
+		--password v1.0.3-7841277 \
+		--salt d3c24a79-c533-4e2d-974a-b4aab92198a6 \
 		--decrypt
 	openssl req \
 		-x509 \

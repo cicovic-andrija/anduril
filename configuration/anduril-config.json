@@ -29,7 +29,7 @@
         "relative_content_path": "notes",
         "ssh_auth": {
             "user": "git",
-            "private_key_path": "",
+            "private_key_path": "/etc/github/auth/notes-anduril-prod-v2.key",
             "private_key_password": ""
         }
     },
