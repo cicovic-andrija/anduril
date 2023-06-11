@@ -20,7 +20,7 @@ const (
 // Command-line options and their values.
 const (
 	ConfigOption    = "config"
-	EncryptedOption = "encrypted"
+	PlaintextOption = "plaintext"
 )
 
 // Version and build.
@@ -134,6 +134,10 @@ func (env *Environment) CompiledTemplatePath(templateName string) string {
 }
 
 func (env *Environment) parseCommandLine() error {
+	var (
+		plaintext bool
+	)
+
 	flag.StringVar(
 		&env.configPath,
 		ConfigOption,
@@ -142,13 +146,15 @@ func (env *Environment) parseCommandLine() error {
 	)
 
 	flag.BoolVar(
-		&env.encryptedConfig,
-		EncryptedOption,
+		&plaintext,
+		PlaintextOption,
 		false,
-		"encrypted config indicator",
+		"plaintext config indicator",
 	)
 
 	flag.Parse()
+
+	env.encryptedConfig = !plaintext
 
 	if env.configPath == "" {
 		if env.encryptedConfig {

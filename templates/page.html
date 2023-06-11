@@ -91,7 +91,7 @@
 				<!-- Tag sidebar on the right -->
 				{{ if .IsTagListVisible }}
 				<div class="col-lg-2 pt-3 pt-lg-0 d-flex flex-column align-items-stretch flex-shrink-0 bg-white">
-				{{ if .HighlightedTags }}
+				{{ if and .HighlightedTags (not .IsArticleListVisible) }}
 					<h1>Tags</h1>
 					{{ range .HighlightedTags }}
 					<h5 class="pt-1"><a class="taglink{{ if $.IsHighlightedRed . }} redtaglink{{ end }}" href="/tags/{{ . }}">{{ . }}</a></h5>
