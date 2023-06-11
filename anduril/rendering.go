@@ -25,6 +25,14 @@ type Page struct {
 	contentTemplate string
 }
 
+func (p *Page) SlicedArticlesFirstPage() []*Article {
+	return p.Articles[0 : len(p.Articles)/2+len(p.Articles)%2]
+}
+
+func (p *Page) SlicedArticlesSecondPage() []*Article {
+	return p.Articles[len(p.Articles)/2+len(p.Articles)%2 : len(p.Articles)]
+}
+
 func (p *Page) IsHighlighted(tag string) bool {
 	for _, highlighted := range p.HighlightedTags {
 		if highlighted == tag {
@@ -32,14 +40,6 @@ func (p *Page) IsHighlighted(tag string) bool {
 		}
 	}
 	return false
-}
-
-func (p *Page) SlicedArticlesFirstPage() []*Article {
-	return p.Articles[0 : len(p.Articles)/2+len(p.Articles)%2]
-}
-
-func (p *Page) SlicedArticlesSecondPage() []*Article {
-	return p.Articles[len(p.Articles)/2+len(p.Articles)%2 : len(p.Articles)]
 }
 
 func (p *Page) IsHighlightedRed(tag string) bool {
@@ -52,16 +52,6 @@ func (p *Page) IsArticleListVisible() bool {
 
 func (p *Page) IsTagListVisible() bool {
 	return len(p.Tags) > 0 && !(len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.HighlightedTags[0] == MetaPageTag)
-}
-
-func (p *Page) ArticleListDesignator() string {
-	if len(p.HighlightedTags) == 1 {
-		return fmt.Sprintf("Articles tagged %q", p.HighlightedTags[0])
-	} else if len(p.Tags) > 0 {
-		return "Tagged articles"
-	} else {
-		return "All articles"
-	}
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {

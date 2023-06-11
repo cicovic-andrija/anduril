@@ -7,7 +7,8 @@ main>.container {
 }
 
 h1 {
-    border-bottom: 1px solid gainsboro;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid gainsboro;
 }
 
 h2,
@@ -23,18 +24,12 @@ a:link,
 a:visited,
 a:active {
     text-decoration: none;
-    transition: all 0.3s ease-in-out;
 }
 
 a:link.redtaglink,
 a:visited.redtaglink,
 a:active.redtaglink {
-    text-decoration: none;
-    color: white;
-    background-color: red;
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
-    transition: all 0.3s ease-in-out;
+    color: red;
 }
 
 a:hover {
@@ -44,8 +39,7 @@ a:hover {
 
 a:hover.taglink {
     text-decoration: none;
-    color: black;
-    background-color: orange;
-    padding-left: 1rem;
-    padding-right: 0.3rem;
+    color: orange;
+    border-top: 2px solid greenyellow;
+    border-bottom: 2px solid greenyellow;
 }

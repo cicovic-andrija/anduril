@@ -50,25 +50,40 @@
 				<!-- Article lists OR content of one article -->
 				<div class="col-lg container">
 				{{ if .IsArticleListVisible }}
-					<h1>{{ .ArticleListDesignator }}</h1>
-						<div class="row">
-							<div class="col-lg">
-							{{ range .SlicedArticlesFirstPage }}
-									<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
-									<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
-							{{ end }}
-							</div>
-							{{ if .IsTagListVisible }}
-							<div class="col-xl-6">
-							{{ else }}
-							<div class="col-lg-6">
-								{{ end }}
-							{{ range .SlicedArticlesSecondPage }}
-									<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
-									<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
-							{{ end }}
-							</div>
+					{{ if eq (len .HighlightedTags) 1 }}
+					<h1>Articles tagged <a href="/tags/{{ index .HighlightedTags 0 }}">{{ index .HighlightedTags 0 }}</a></h1>
+					{{ else if gt (len .Tags) 0 }}
+					<h1>Tagged articles</h1>
+					{{ else }}
+					<h1>All articles</h1>
+					{{ end }}
+					<div class="row">
+						<div class="col-lg">
+						{{ if gt (len .Articles) 10 }}
+						{{ range .SlicedArticlesFirstPage }}
+							<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+							<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
+						{{ end }}
+						{{ else }}
+						{{ range .Articles }}
+							<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+							<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
+						{{ end }}
+						{{ end }}
 						</div>
+						{{ if gt (len .Articles) 10 }}
+						{{ if .IsTagListVisible }}
+						<div class="col-xl-6">
+						{{ else }}
+						<div class="col-lg-6">
+							{{ end }}
+						{{ range .SlicedArticlesSecondPage }}
+								<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+								<h6 class="text-secondary">{{ .LastModificationDateMessage }}</h6>
+						{{ end }}
+						</div>
+						{{ end }}
+					</div>
 				{{ else }}
 					{{ template "articleContent" . }}
 				{{ end }}
