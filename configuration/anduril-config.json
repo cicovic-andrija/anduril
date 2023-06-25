@@ -36,7 +36,7 @@
     "settings": {
         "publish_private_articles": false,
         "publish_personal_articles": true,
-        "repository_sync_period": "15m",
+        "repository_sync_period": "5m",
         "stale_file_cleanup_period": "24h"
     }
 }

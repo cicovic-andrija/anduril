@@ -1,3 +1,5 @@
+*.txt
+*.json
 **/out/
 **/bootstrap*
 **/*.css

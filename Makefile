@@ -19,7 +19,7 @@ all: $(OUTPUT_DIR) build tools
 .PHONY: devenv
 devenv: build tools
 	mkdir -p $(OUTPUT_DIR)/data
-	cp -r templates $(OUTPUT_DIR)/data
+	cp -r assets/templates $(OUTPUT_DIR)/data
 	cp -r static $(OUTPUT_DIR)/data
 	$(MKCONF_PATH) \
 		--template configuration/anduril-config.json \
