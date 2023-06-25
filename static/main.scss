@@ -5,6 +5,7 @@
 @import 'sidebar';
 @import 'forms';
 @import 'lists';
+@import 'tables';
 
 .d-flex {
     display: flex;
@@ -21,4 +22,8 @@ pre {
     border-radius: 3px;
     color: $orange;
     display: block
+}
+
+pre code {
+    border: none;
 }
