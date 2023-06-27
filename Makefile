@@ -8,6 +8,7 @@ MKCONF_PATH = $(OUTPUT_DIR)/mkconf
 .PHONY: build
 build: | $(OUTPUT_DIR)
 	go build -o $(OUTPUT_DIR)/$(SERVER_BIN) main.go
+	sass assets/stylesheets/main.css:assets/stylesheets/styles.css
 
 .PHONY: tools
 tools: | $(OUTPUT_DIR)

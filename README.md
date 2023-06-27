@@ -42,20 +42,34 @@ The `Makefile` file in the root directory configures the `make` build system for
 
 **Important note: Here begins the hidden section of README.md, not published on the website.**
 
+# Working Directory Structure
+
+| Location in repository | Location in working directory `/srv/anduril` |
+| ---------------------- | ----------------------------- |
+| `out/anduril-server` | `anduril-server` |
+| `out/data/anduril-config.json` | `data/anduril-config.json` |
+| `out/data/encrypted-config.txt` | `data/encrypted-config.txt` |
+| `assets/templates/*.html` | `data/templates/*.html` |
+| `assets/scripts/*.js` | `data/assets/*.js` |
+| `assets/stylesheets/*.css` | `data/assets/*.css` |
+| `assets/icons/*` | `data/assets/icons/*` |
+
 # How To Sync Files to the Remote Machine
 
 ```
 ping notes.acicovic.me
 ssh root@notes.acicovic.me
-mkdir -p /srv/anduril
-mkdir -p /srv/anduril/data
+mkdir -p /srv/anduril/data/assets
 exit
-rsync -v ./service/anduril-config.json root@notes.acicovic.me:/srv/anduril/data/
-rsync -rv static templates root@notes.acicovic.me:/srv/anduril/data/
 rsync -v ./out/anduril-server root@notes.acicovic.me:/srv/anduril/
+rsync -v ./out/encrypted-config.txt root@notes.acicovic.me:/srv/anduril/data/
+rsync -rv assets/templates root@notes.acicovic.me:/srv/anduril/data/
+rsync -v assets/scripts/*.js root@notes.acicovic.me:/srv/anduril/data/assets/
+rsync -v assets/stylesheets/*.css root@notes.acicovic.me:/srv/anduril/data/assets/
+rsync -rv assets/icons root@notes.acicovic.me:/srv/anduril/data/assets/
 ```
 
-# Local Monitoring
+# Local Log Monitoring
 
 ```
 ping notes.acicovic.me
