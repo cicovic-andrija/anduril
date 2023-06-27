@@ -8,8 +8,7 @@
         },
         "enable_file_server": true,
         "file_server": {
-            "directory": "static",
-            "url_prefix": "/static/",
+            "url_prefix": "/assets/",
             "allowed": [
                 "frontendProcessing.js",
                 "stylesheet.css",

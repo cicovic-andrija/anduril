@@ -6,29 +6,40 @@ SERVER_BIN = anduril-server
 MKCONF_PATH = $(OUTPUT_DIR)/mkconf
 
 .PHONY: build
-build: | $(OUTPUT_DIR)
+build: css | $(OUTPUT_DIR)
 	go build -o $(OUTPUT_DIR)/$(SERVER_BIN) main.go
-	sass assets/stylesheets/main.css:assets/stylesheets/styles.css
 
-.PHONY: tools
+.PHONY: css
+css:
+	sass assets/stylesheets/main.scss:assets/stylesheets/styles.css
+
+.PHONY: config
+config: tools
+	$(MKCONF_PATH) \
+		--template configuration/anduril-config.json \
+		--to $(OUTPUT_DIR)/data/encrypted-config.txt \
+		--profile prod \
+		--decrypt | jq
+
+.PHONY: tools | $(OUTPUT_DIR)
 tools: | $(OUTPUT_DIR)
 	go build -o $(MKCONF_PATH) ./tools/mkconf.go
 
 .PHONY: all
-all: $(OUTPUT_DIR) build tools
+all: $(OUTPUT_DIR) build tools config
 
 .PHONY: devenv
 devenv: build tools
-	mkdir -p $(OUTPUT_DIR)/data
-	cp -r assets/templates $(OUTPUT_DIR)/data
-	cp -r static $(OUTPUT_DIR)/data
+	mkdir -p $(OUTPUT_DIR)/data/assets
+	rsync -rv assets/templates $(OUTPUT_DIR)/data/
+	rsync -v assets/scripts/*.js $(OUTPUT_DIR)/data/assets/
+	rsync -v assets/stylesheets/*.css $(OUTPUT_DIR)/data/assets/
+	rsync -rv assets/icons $(OUTPUT_DIR)/data/assets/
 	$(MKCONF_PATH) \
 		--template configuration/anduril-config.json \
 		--to $(OUTPUT_DIR)/data/encrypted-config.txt \
 		--profile dev \
-		--password v1.0.3-7841277 \
-		--salt d3c24a79-c533-4e2d-974a-b4aab92198a6 \
-		--decrypt
+		--decrypt | jq
 	openssl req \
 		-x509 \
 		-newkey rsa:4096 \
@@ -41,7 +52,7 @@ devenv: build tools
 		>/dev/null 2>/dev/null
 
 $(OUTPUT_DIR):
-	mkdir -p $(OUTPUT_DIR)
+	mkdir -p $(OUTPUT_DIR)/data
 
 .PHONY: clean
 clean:

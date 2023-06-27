@@ -47,7 +47,7 @@ func NewWebServer(env *service.Environment, config *Config) (server *WebServer, 
 	}
 
 	config.HTTPS.LogsDirectory = env.LogsDirectoryPath()
-	config.HTTPS.FileServer.Directory = env.StaticDataDirectory()
+	config.HTTPS.FileServer.Directory = env.AssetsDataDirectory()
 	httpsServer, err := https.NewServer(&config.HTTPS)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init HTTPS server: %v", err)
