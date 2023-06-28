@@ -8,6 +8,7 @@
 - `git`
 - `make`
 - `openssl`
+- `pandoc`
 - `rsync`
 
 **Important note: The server is designed to be run on a Linux operating system.**
@@ -29,7 +30,7 @@ The `Makefile` file in the root directory configures the `make` build system for
 2. Review and fill empty fields where appropriate in the config file located in `configuration/`.
 3. Execute `mkconf` the same way as in `make devenv` target, but use the `--profile prod` option to select the production configuration profile.
 4. In case of first-time deployments, the following requirements must be met on the remote server machine (`notes.acicovic.me` host):
-    1. Make sure `systemd`, `openssl` and `rsync` are installed on the system.
+    1. Make sure `systemd`, `openssl`, `pandoc`, and `rsync` are installed on the system.
     2. Install the HTTPS certificate to the location indicated by the `https.network` section of the server's config file (e.g. instructions [https://letsencrypt.org/](https://letsencrypt.org/)).
     3. Add the needed SSH public key fingerprints to the SSH `known_hosts` file.
     4. From the local machine, send the `systemd` service config file to the remote machine: `rsync -v ./configuration/anduril.service {username}@notes.acicovic.me:/etc/systemd/system/`.
