@@ -8,7 +8,7 @@ import (
 
 const (
 	// Top-level template for rendering HTML pages.
-	PageTemplate = "page.html"
+	PageTemplate = "page-v2.html"
 	// Dynamic article content template name.
 	ArticleContentTextTemplate = "articleContent"
 	// String format for dynamic templates that render article content.

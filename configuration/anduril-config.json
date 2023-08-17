@@ -13,7 +13,12 @@
                 "frontendProcessing.js",
                 "stylesheet.css",
                 "bootstrap.bundle.min.js",
-                "bootstrap.min.css"
+                "bootstrap.min.css",
+
+                "styles.css",
+                "icons/favicon.ico",
+                "icons/lionfish.png",
+                "icons/chevron-up@2x.png"
             ]
         },
         "log_requests": true,
