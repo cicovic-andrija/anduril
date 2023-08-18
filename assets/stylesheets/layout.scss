@@ -140,8 +140,8 @@ header {
 
   #tagline {
     position: absolute;
-    top: 11px;
-    left: 120px;
+    top: 20px;
+    left: 140px;
     display: block;
     margin-top: 1px;
     font-size: 24px;
@@ -370,7 +370,7 @@ footer {
   .site-source {
     float: left;
     padding-left: 46px;
-    @include background-image-2x("/images/icons/code", 38px, 23px, 0 2px);
+    @include background-image-2x("/assets/icons/code", 38px, 23px, 0 2px);
   }
 
   .sfc-member {
