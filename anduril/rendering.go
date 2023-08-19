@@ -10,9 +10,9 @@ const (
 	// Top-level template for rendering HTML pages.
 	PageTemplate = "page-v2.html"
 	// Dynamic article content template name.
-	ArticleContentTextTemplate = "articleContent"
+	ContentPlaceholderTemplate = "content"
 	// String format for dynamic templates that render article content.
-	ArticleContentTextTemplateFmt = "{{ template \"%s\" . }}"
+	ContentPlaceholderTemplateFmt = "{{ template \"%s\" . }}"
 )
 
 type Page struct {
@@ -55,7 +55,7 @@ func (p *Page) IsTagListVisible() bool {
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
-	footerText := article.LastModificationDateMessage()
+	footerText := fmt.Sprintf("Last updated on %s", article.ModifiedTime.Format("Jan 2 2006."))
 	if article.Comment != "" {
 		footerText = article.Comment
 	}
@@ -66,7 +66,7 @@ func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revis
 		HighlightedTags: append([]string{}, article.Tags...),
 		Tags:            revision.SortedTags,
 		FooterText:      footerText,
-		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
+		contentTemplate: VersionedHTMLTemplate(article.Key, revision.Hash),
 	})
 }
 
@@ -97,18 +97,24 @@ func (s *WebServer) renderListOfTaggedArticles(w io.Writer, revision *Revision) 
 	})
 }
 
+// TODO: Handle situations where Footer text is ""
 func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 	t, err := template.ParseFiles(s.env.TemplatePath(PageTemplate))
 	if err == nil {
 		if page.contentTemplate != "" {
-			t.New(ArticleContentTextTemplate).Parse(fmt.Sprintf(ArticleContentTextTemplateFmt, page.contentTemplate))
+			contentPlaceholder := fmt.Sprintf(ContentPlaceholderTemplateFmt, page.contentTemplate)
+			t.New(ContentPlaceholderTemplate).Parse(contentPlaceholder)
 			_, err = t.ParseFiles(s.env.CompiledTemplatePath(page.contentTemplate))
 		} else {
-			t.New(ArticleContentTextTemplate).Parse("")
+			t.New(ContentPlaceholderTemplate).Parse("")
 		}
 	}
 	if err != nil {
 		return fmt.Errorf("failed to parse one or more template files: %v", err)
 	}
 	return t.ExecuteTemplate(w, PageTemplate, page)
+}
+
+func VersionedHTMLTemplate(baseName string, versionHash string) string {
+	return fmt.Sprintf("%s_%s.html", baseName, versionHash)
 }

@@ -67,7 +67,7 @@ func (s *WebServer) cleanUpStaleFiles(trace service.TraceCallback, v ...interfac
 		return nil
 	}
 
-	latestVersionSuffix := VersionedArticleTemplateSuffix(s.latestRevision.Hash)
+	latestVersionSuffix := fmt.Sprintf("_%s.html", s.latestRevision.Hash)
 	failed := []string{}
 	cleanedUp := 0
 

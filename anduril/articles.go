@@ -24,6 +24,7 @@ const (
 	OutdatedTag        = "outdated"
 	PrivateArticleTag  = "private"
 	PersonalArticleTag = "my"
+	HiddenArticleTag   = "hidden"
 )
 
 type Article struct {
@@ -46,7 +47,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 				s.warn("file %s does not have the expected extension %q and will not been processed", fileName, MarkdownExtension)
 				return
 			}
-			if err := s.processDataFile(revision, fileName); err != nil {
+			if err := s.scanDataFile(revision, fileName); err != nil {
 				s.warn("failed to process data file %s: %v", fileName, err)
 			}
 		},
@@ -61,8 +62,8 @@ func (s *WebServer) processRevision(revision *Revision) error {
 
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
-			filepath.Join(revision.ContainerPath, article.File),
-			filepath.Join(s.env.CompiledWorkDirectory(), article.VersionedHTMLTemplate(revision.Hash)),
+			filepath.Join(revision.ContainerPath, article.File),                                             // input file
+			filepath.Join(s.env.CompiledWorkDirectory(), VersionedHTMLTemplate(article.Key, revision.Hash)), // output file
 		)
 		if err != nil {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)
@@ -76,7 +77,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	return nil
 }
 
-func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
+func (s *WebServer) scanDataFile(revision *Revision, fileName string) error {
 	file, err := fs.OpenFile(filepath.Join(revision.ContainerPath, fileName))
 	if err != nil {
 		return err
@@ -133,6 +134,10 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 	return nil
 }
 
+func (s *WebServer) generateSupportingPages() {
+	// TODO
+}
+
 func (a *Article) Normalize() (err error) {
 	if a.Title == "" {
 		err = errors.New("empty title")
@@ -158,16 +163,4 @@ func (a *Article) Normalize() (err error) {
 	a.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(a.File, ".md")), " ", "-")
 
 	return nil
-}
-
-func (a *Article) VersionedHTMLTemplate(versionHash string) string {
-	return fmt.Sprintf("%s%s", a.Key, VersionedArticleTemplateSuffix(versionHash))
-}
-
-func (a *Article) LastModificationDateMessage() string {
-	return fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
-}
-
-func VersionedArticleTemplateSuffix(versionHash string) string {
-	return fmt.Sprintf("_%s.html", versionHash)
 }
