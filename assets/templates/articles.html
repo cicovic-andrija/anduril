@@ -1,0 +1,4 @@
+<h1>{{ if eq (len .HighlightedTags) 1 }}Articles tagged <a href="/tags/{{ index .HighlightedTags 0 }}">{{ index .HighlightedTags 0 }}</a>{{ else }}Articles{{ end }}</h1>
+{{ range .Articles }}
+<h4><a href="/articles/{{ .Key }}">{{ .Title }}</a></h4>
+{{ end }}

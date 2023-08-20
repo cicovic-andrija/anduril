@@ -3,8 +3,6 @@ package anduril
 import (
 	"errors"
 	"fmt"
-	"html/template"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -57,29 +55,13 @@ func (s *WebServer) processRevision(revision *Revision) error {
 		return fmt.Errorf("failed to process data batch: %v", err)
 	}
 
+	// Axiom: There is at least one article.
+
 	for tag := range revision.Tags {
 		revision.SortedTags = append(revision.SortedTags, tag)
 	}
 	sort.Strings(revision.SortedTags)
-
-	supportTemplates := []string{ArticlesTemplate}
-	for _, templateName := range supportTemplates {
-		var (
-			f   *os.File
-			t   *template.Template
-			err error
-		)
-		t, err = template.ParseFiles(s.env.TemplatePath(templateName))
-		if err == nil {
-			f, err = os.Create(filepath.Join(s.env.CompiledWorkDirectory(), VersionedHTMLTemplate(strings.TrimSuffix(templateName, ".html"), revision.Hash)))
-		}
-		if err == nil {
-			err = t.Execute(f, revision)
-		}
-		if err != nil {
-			return fmt.Errorf("failed to generate a support page from template %s: %v", templateName, err)
-		}
-	}
+	revision.DefaultTag = revision.SortedTags[0]
 
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
@@ -90,11 +72,6 @@ func (s *WebServer) processRevision(revision *Revision) error {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)
 		}
 	}
-
-	// TODO: Remove
-	sort.Slice(revision.SortedArticles, func(i, j int) bool {
-		return revision.SortedArticles[i].Title < revision.SortedArticles[j].Title
-	})
 
 	return nil
 }
@@ -128,9 +105,6 @@ func (s *WebServer) scanDataFile(revision *Revision, fileName string) error {
 
 	// Cache article by key.
 	revision.Articles[article.Key] = article
-
-	// Note: will be sorted later.
-	revision.SortedArticles = append(revision.SortedArticles, article)
 
 	// Ensure every article is tagged; articles without tags are viewed as incomplete.
 	if len(article.Tags) == 0 {

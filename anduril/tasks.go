@@ -36,12 +36,11 @@ func (s *WebServer) syncRepository(trace service.TraceCallback, v ...interface{}
 
 	if found {
 		revision := &Revision{
-			Articles:       make(map[string]*Article),
-			SortedArticles: make([]*Article, 0),
-			Tags:           make(map[string][]*Article),
-			SortedTags:     make([]string, 0),
-			ContainerPath:  s.repository.ContentRoot(),
-			Hash:           s.repository.LatestRevisionID(),
+			Articles:      make(map[string]*Article),
+			Tags:          make(map[string][]*Article),
+			SortedTags:    make([]string, 0),
+			ContainerPath: s.repository.ContentRoot(),
+			Hash:          s.repository.LatestRevisionID(),
 		}
 		trace("new revision found with hash %s", revision.Hash)
 

@@ -20,14 +20,15 @@ func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebServer) ArticleRootHandler(w http.ResponseWriter, r *http.Request) {
-	revision := DummyRevision
-	if s.latestRevision != nil {
+	if s.latestRevision == nil {
+		s.PageNotFoundHandler(w, r)
+		return
+	} else {
 		s.revisionLock.RLock()
 		defer s.revisionLock.RUnlock()
-		revision = s.latestRevision
 	}
 
-	err := s.renderListOfAllArticles(w, revision)
+	err := s.renderArticleList(w, s.latestRevision)
 	if err != nil {
 		s.warn("failed to render list of all articles: %v", err)
 	}
@@ -46,16 +47,23 @@ func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
-	revision := DummyRevision
-	if s.latestRevision != nil {
+	if s.latestRevision == nil {
+		s.PageNotFoundHandler(w, r)
+		return
+	} else {
 		s.revisionLock.RLock()
 		defer s.revisionLock.RUnlock()
-		revision = s.latestRevision
 	}
 
-	err := s.renderListOfTaggedArticles(w, revision)
+	tag := s.latestRevision.DefaultTag
+	articles := s.latestRevision.SearchByTag(tag)
+	if articles == nil {
+		panic(s.error("impossible server state: WebServer.TagRootHandler: articles must exist for tag but not found: tag: %s", tag))
+
+	}
+	err := s.renderArticleListForTag(w, tag, articles, s.latestRevision)
 	if err != nil {
-		s.warn("failed to render list of all articles and tags: %v", err)
+		s.warn("failed to render list of all articles for tag %q: %v", tag, err)
 	}
 }
 
@@ -65,7 +73,7 @@ func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
 	if articles == nil {
 		panic(s.error("impossible server state: WebServer.TagHandlerLocked: articles must exist for tag but not found: tag: %s", tag))
 	}
-	err := s.renderListOfAllArticlesForTag(w, tag, articles, s.latestRevision)
+	err := s.renderArticleListForTag(w, tag, articles, s.latestRevision)
 	if err != nil {
 		s.warn("failed to render list of all articles for tag %q: %v", tag, err)
 	}
@@ -73,10 +81,10 @@ func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
 
 func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, &Page{
+		Key:             "404",
 		Title:           "Not Found",
 		FooterText:      "Page Not Found",
 		contentTemplate: NotFoundTemplate,
-		isStatic:        true,
 	})
 }
 

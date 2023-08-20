@@ -20,22 +20,22 @@ const (
 )
 
 type Page struct {
+	Key             string
 	Title           string
-	Articles        []*Article
+	Sidebar         Sidebar
 	Tags            []string
 	HighlightedTags []string
-	Is404           bool
+	Articles        []*Article
 	FooterText      string
 	contentTemplate string
-	isStatic        bool
+	alreadyCompiled bool
 }
 
-func (p *Page) SlicedArticlesFirstPage() []*Article {
-	return p.Articles[0 : len(p.Articles)/2+len(p.Articles)%2]
-}
-
-func (p *Page) SlicedArticlesSecondPage() []*Article {
-	return p.Articles[len(p.Articles)/2+len(p.Articles)%2 : len(p.Articles)]
+type Sidebar struct {
+	ArticlesHighlighted       bool
+	GroupedByTitleHighlighted bool
+	GroupedByDateHighlighted  bool
+	TagsHighlighted           bool
 }
 
 func (p *Page) IsHighlighted(tag string) bool {
@@ -47,18 +47,6 @@ func (p *Page) IsHighlighted(tag string) bool {
 	return false
 }
 
-func (p *Page) IsHighlightedRed(tag string) bool {
-	return tag == DraftTag || tag == OutdatedTag
-}
-
-func (p *Page) IsArticleListVisible() bool {
-	return (len(p.Articles) > 1) || (len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.contentTemplate == "")
-}
-
-func (p *Page) IsTagListVisible() bool {
-	return len(p.Tags) > 0 && !(len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.HighlightedTags[0] == MetaPageTag)
-}
-
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
 	footerText := fmt.Sprintf("Last updated on %s", article.ModifiedTime.Format("Jan 2 2006."))
 	if article.Comment != "" {
@@ -66,50 +54,51 @@ func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revis
 	}
 
 	return s.renderPage(w, &Page{
+		Key:             article.Key,
 		Title:           article.Title,
-		Articles:        []*Article{article},
-		HighlightedTags: append([]string{}, article.Tags...),
 		Tags:            revision.SortedTags,
+		HighlightedTags: append([]string{}, article.Tags...),
 		FooterText:      footerText,
 		contentTemplate: VersionedHTMLTemplate(article.Key, revision.Hash),
+		alreadyCompiled: true,
 	})
 }
 
-func (s *WebServer) renderListOfAllArticles(w io.Writer, revision *Revision) error {
+func (s *WebServer) renderArticleList(w io.Writer, revision *Revision) error {
 	return s.renderPage(w, &Page{
-		Title:      "Articles",
-		Articles:   revision.SortedArticles,
-		FooterText: fmt.Sprintf("There are %d articles listed.", len(revision.SortedArticles)),
-	})
-}
-
-func (s *WebServer) renderListOfAllArticlesForTag(w io.Writer, tag string, articles []*Article, revision *Revision) error {
-	return s.renderPage(w, &Page{
-		Title:           tag,
-		Articles:        articles,
-		HighlightedTags: []string{tag},
+		Key:   "articles",
+		Title: "Articles",
+		Sidebar: Sidebar{
+			ArticlesHighlighted: true,
+		},
 		Tags:            revision.SortedTags,
-		FooterText:      fmt.Sprintf("There are %d articles listed.", len(articles)),
+		FooterText:      fmt.Sprintf("There are %d articles listed.", 0), // TODO
+		contentTemplate: ArticlesTemplate,
 	})
 }
 
-func (s *WebServer) renderListOfTaggedArticles(w io.Writer, revision *Revision) error {
+func (s *WebServer) renderArticleListForTag(w io.Writer, tag string, articles []*Article, revision *Revision) error {
 	return s.renderPage(w, &Page{
-		Title:      "Tags",
-		Articles:   revision.SortedArticles,
-		Tags:       revision.SortedTags,
-		FooterText: fmt.Sprintf("There are %d tags listed.", len(revision.SortedTags)),
+		Key:   tag,
+		Title: tag,
+		Sidebar: Sidebar{
+			TagsHighlighted: true,
+		},
+		Tags:            revision.SortedTags,
+		HighlightedTags: []string{tag},
+		Articles:        articles,
+		FooterText:      fmt.Sprintf("There are %d articles listed.", len(articles)),
+		contentTemplate: ArticlesTemplate,
 	})
 }
 
-// TODO: Handle situations where Footer text is ""
 func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 	t, err := template.ParseFiles(s.env.TemplatePath(PageTemplate))
 	if err == nil {
 		if page.contentTemplate != "" {
 			contentPlaceholder := fmt.Sprintf(ContentPlaceholderTemplateFmt, page.contentTemplate)
 			contentTemplatePath := s.env.CompiledTemplatePath(page.contentTemplate)
-			if page.isStatic {
+			if !page.alreadyCompiled {
 				contentTemplatePath = s.env.TemplatePath(page.contentTemplate)
 			}
 			t.New(ContentPlaceholderTemplate).Parse(contentPlaceholder)

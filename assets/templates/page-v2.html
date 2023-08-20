@@ -31,32 +31,28 @@
     <nav>
         <ul>
         <li>
-            <a href="/articles">Articles</a>
+            <a {{ if .Sidebar.ArticlesHighlighted }}class="active"{{end}} href="/articles">Articles</a>
             <ul class="expanded">
                 <li>
-                    <a href="/articles">Grouped by date</a>
+                    <a {{ if .Sidebar.GroupedByDateHighlighted }}class="active"{{end}} href="/articles">Grouped by date</a>
                 </li>
                 <li>
-                    <a class="active" href="/articles">Grouped by title</a>
+                    <a {{ if .Sidebar.GroupedByTitleHighlighted }}class="active"{{end}} href="/articles">Grouped by title</a>
                 </li>
             </ul>
         </li>
         <li>
-            <a class="active" href="/tags">Tags</a> <!-- this is important for highlighting -->
+            <a {{ if .Sidebar.TagsHighlighted }}class="active"{{end}} href="/tags">Tags</a> <!-- this is important for highlighting -->
             <ul class="expanded">
-            <li>
-                <a href="/programming">programming</a>
-            </li>
-            <li>
-                <a class="active" href="/diving">diving</a>
-            </li>
-            <li>
-                <a href="/literature">literature</a>
-            </li>
+                {{ range .Tags }}
+                <li>
+                    <a {{ if $.IsHighlighted . }}class="active"{{end}} href="/tags/{{ . }}">{{ . }}</a>
+                </li>
+                {{ end }}
             </ul>
         </li>
         <li>
-            <a href="/about">About</a>
+            <a {{ if eq .Key "about" }}class="active"{{end}} href="/about">About</a>
         </li>
         </ul>
     </nav>
@@ -76,7 +72,8 @@
     <div class="inner">
         <footer>
           <div class="site-source">
-            <p>{{ .FooterText }}</p>
+            <!-- TODO: add class for this?-->
+            <p style="padding-top: 3px;">{{ .FooterText }}</p>
           </div>
         </footer>
         <a href="#top" class="no-js scrollToTop" id="scrollToTop" data-label="Scroll to top">
