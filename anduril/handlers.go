@@ -65,7 +65,6 @@ func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
 	articles := s.latestRevision.SearchByTag(tag)
 	if articles == nil {
 		panic(s.error("impossible server state: WebServer.TagRootHandler: articles must exist for tag but not found: tag: %s", tag))
-
 	}
 	err := s.renderArticleListForTag(w, tag, articles, s.latestRevision)
 	if err != nil {

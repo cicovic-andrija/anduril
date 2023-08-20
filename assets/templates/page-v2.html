@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer-when-downgrade">
-    <!-- <meta name="keywords" content="a,b,c"> -->
     <meta name="author" content="Andrija Cicović">
     <link rel="stylesheet" media="screen" href="/assets/styles.css">
     <link href="/assets/icons/favicon.ico" rel="shortcut icon" type="image/x-icon">
@@ -45,7 +43,7 @@
             </ul>
         </li>
         <li>
-            <a {{ if .Sidebar.TagsHighlighted }}class="active"{{ end }} href="/tags">Tags</a> <!-- this is important for highlighting -->
+            <a {{ if .Sidebar.TagsHighlighted }}class="active"{{ end }} href="/tags">Tags</a>
             <ul {{ if gt (len .HighlightedTags) 0 }}class="expanded"{{ end }}>
                 {{ range .Tags }}
                 <li>
@@ -63,9 +61,7 @@
 
     <div id="content">
     <div id="main">
-
     {{ template "content" . }}
-
     </div> <!-- #main -->
     </div> <!-- #content -->
 
@@ -80,11 +76,11 @@
           </div>
         </footer>
         <a href="#top" class="no-js scrollToTop" id="scrollToTop" data-label="Scroll to top">
-          <img src="/assets/icons/chevron-up@2x.png" width="20" height="20" alt="scroll-to-top" />
+            <img src="/assets/icons/chevron-up@2x.png" width="20" height="20" alt="scroll-to-top" />
         </a>
     </div> <!-- .inner -->
 
     <script src="/assets/scroll.js"></script>
+    <script src="/assets/search.js"></script>
 </body>
-
 </html>

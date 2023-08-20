@@ -12,13 +12,15 @@
             "allowed": [
                 "styles.css",
                 "scroll.js",
+                "search.js",
                 "icons/favicon.ico",
                 "icons/code.png",
                 "icons/code@2x.png",
                 "icons/search.png",
                 "icons/search@2x.png",
+                "icons/chevron-up@2x.png",
                 "icons/lionfish.png",
-                "icons/chevron-up@2x.png"
+                "icons/octopus.png"
             ]
         },
         "log_requests": true,
