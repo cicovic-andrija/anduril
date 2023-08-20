@@ -37,10 +37,10 @@
             <a {{ if .Sidebar.ArticlesHighlighted }}class="active"{{ end }} href="/articles">Articles</a>
             <ul {{ if .Sidebar.ArticlesHighlighted }}class="expanded"{{ end }}>
                 <li>
-                    <a {{ if .Sidebar.GroupedByDateHighlighted }}class="active"{{end}} href="/articles">Grouped by date</a>
+                    <a {{ if .Sidebar.GroupedByDateHighlighted }}class="active"{{end}} href="/articles?group-by=date">Grouped by date</a>
                 </li>
                 <li>
-                    <a {{ if .Sidebar.GroupedByTitleHighlighted }}class="active"{{end}} href="/articles">Grouped by title</a>
+                    <a {{ if .Sidebar.GroupedByTitleHighlighted }}class="active"{{end}} href="/articles?group-by=title">Grouped by title</a>
                 </li>
             </ul>
         </li>

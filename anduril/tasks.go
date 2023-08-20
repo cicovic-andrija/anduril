@@ -38,7 +38,6 @@ func (s *WebServer) syncRepository(trace service.TraceCallback, v ...interface{}
 		revision := &Revision{
 			Articles:      make(map[string]*Article),
 			Tags:          make(map[string][]*Article),
-			SortedTags:    make([]string, 0),
 			ContainerPath: s.repository.ContentRoot(),
 			Hash:          s.repository.LatestRevisionID(),
 		}

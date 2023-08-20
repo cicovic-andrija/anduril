@@ -14,11 +14,18 @@ const (
 // the file system location written in ContainerPath.
 type Revision struct {
 	Articles      map[string]*Article
+	GroupsByDate  []ArticleGroup
+	GroupsByTitle []ArticleGroup
 	Tags          map[string][]*Article
 	SortedTags    []string
 	DefaultTag    string
 	ContainerPath string
 	Hash          string
+}
+
+type ArticleGroup struct {
+	GroupTitle string
+	Articles   []*Article
 }
 
 func (r *Revision) FindObject(key string, objectType ObjectType) (found bool) {

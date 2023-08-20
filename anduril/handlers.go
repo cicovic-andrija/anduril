@@ -28,7 +28,13 @@ func (s *WebServer) ArticleRootHandler(w http.ResponseWriter, r *http.Request) {
 		defer s.revisionLock.RUnlock()
 	}
 
-	err := s.renderArticleList(w, s.latestRevision)
+	// By default, group articles by date.
+	groupArticlesBy := "date"
+	if r.URL.Query().Get("group-by") == "title" {
+		groupArticlesBy = "title"
+	}
+
+	err := s.renderArticleList(w, s.latestRevision, groupArticlesBy)
 	if err != nil {
 		s.warn("failed to render list of all articles: %v", err)
 	}

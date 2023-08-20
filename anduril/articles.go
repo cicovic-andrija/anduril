@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/cicovic-andrija/anduril/yfm"
 	"github.com/cicovic-andrija/libgo/fs"
@@ -56,12 +57,6 @@ func (s *WebServer) processRevision(revision *Revision) error {
 
 	// Axiom: There is at least one article.
 
-	for tag := range revision.Tags {
-		revision.SortedTags = append(revision.SortedTags, tag)
-	}
-	sort.Strings(revision.SortedTags)
-	revision.DefaultTag = revision.SortedTags[0]
-
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
 			filepath.Join(revision.ContainerPath, article.File),                                             // input file
@@ -71,6 +66,17 @@ func (s *WebServer) processRevision(revision *Revision) error {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)
 		}
 	}
+
+	// Sort out tags.
+	for tag := range revision.Tags {
+		revision.SortedTags = append(revision.SortedTags, tag)
+	}
+	sort.Strings(revision.SortedTags)
+	revision.DefaultTag = revision.SortedTags[0]
+
+	// Sort out articles into groups.
+	groupByDate(revision)
+	groupByTitle(revision)
 
 	return nil
 }
@@ -150,4 +156,54 @@ func (a *Article) Normalize() (err error) {
 	a.Key = strings.ReplaceAll(strings.ToLower(strings.TrimSuffix(a.File, ".md")), " ", "-")
 
 	return nil
+}
+
+func (a *Article) ModifiedDate() string {
+	return a.ModifiedTime.Format("Jan 2 2006.")
+}
+
+func groupByDate(revision *Revision) {
+	groupMap := make(map[string]ArticleGroup)
+	for _, article := range revision.Articles {
+		groupTitle := article.ModifiedTime.Format("January 2006.")
+		group, found := groupMap[groupTitle]
+		if !found {
+			group = ArticleGroup{
+				GroupTitle: groupTitle,
+			}
+		}
+		group.Articles = append(group.Articles, article)
+		groupMap[groupTitle] = group
+	}
+
+	revision.GroupsByDate = make([]ArticleGroup, 0, len(groupMap))
+	for _, group := range groupMap {
+		revision.GroupsByDate = append(revision.GroupsByDate, group)
+	}
+	sort.Slice(revision.GroupsByDate, func(i, j int) bool {
+		return revision.GroupsByDate[i].Articles[0].ModifiedTime.After(revision.GroupsByDate[j].Articles[0].ModifiedTime)
+	})
+}
+
+func groupByTitle(revision *Revision) {
+	groupMap := make(map[string]ArticleGroup)
+	for _, article := range revision.Articles {
+		groupTitle := string(unicode.ToUpper([]rune(article.Title)[0]))
+		group, found := groupMap[groupTitle]
+		if !found {
+			group = ArticleGroup{
+				GroupTitle: groupTitle,
+			}
+		}
+		group.Articles = append(group.Articles, article)
+		groupMap[groupTitle] = group
+	}
+
+	revision.GroupsByTitle = make([]ArticleGroup, 0, len(groupMap))
+	for _, group := range groupMap {
+		revision.GroupsByTitle = append(revision.GroupsByTitle, group)
+	}
+	sort.Slice(revision.GroupsByTitle, func(i, j int) bool {
+		return revision.GroupsByTitle[i].GroupTitle < revision.GroupsByTitle[j].GroupTitle
+	})
 }

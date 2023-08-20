@@ -26,6 +26,7 @@ type Page struct {
 	Tags            []string
 	HighlightedTags []string
 	Articles        []*Article
+	ArticleGroups   []ArticleGroup
 	FooterText      string
 	contentTemplate string
 	alreadyCompiled bool
@@ -64,15 +65,27 @@ func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revis
 	})
 }
 
-func (s *WebServer) renderArticleList(w io.Writer, revision *Revision) error {
+func (s *WebServer) renderArticleList(w io.Writer, revision *Revision, groupBy string) error {
+	var (
+		articleGroups []ArticleGroup
+		sidebar       = Sidebar{ArticlesHighlighted: true}
+	)
+
+	if groupBy == "date" {
+		sidebar.GroupedByDateHighlighted = true
+		articleGroups = revision.GroupsByDate
+	} else { // "title"
+		sidebar.GroupedByTitleHighlighted = true
+		articleGroups = revision.GroupsByTitle
+	}
+
 	return s.renderPage(w, &Page{
-		Key:   "articles",
-		Title: "Articles",
-		Sidebar: Sidebar{
-			ArticlesHighlighted: true,
-		},
+		Key:             "articles",
+		Title:           "Articles",
+		Sidebar:         sidebar,
 		Tags:            revision.SortedTags,
-		FooterText:      fmt.Sprintf("There are %d articles listed.", 0), // TODO
+		ArticleGroups:   articleGroups,
+		FooterText:      fmt.Sprintf("There are %d articles listed.", len(revision.Articles)),
 		contentTemplate: ArticlesTemplate,
 	})
 }
