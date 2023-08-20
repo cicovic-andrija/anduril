@@ -31,8 +31,11 @@
     <nav>
         <ul>
         <li>
-            <a {{ if .Sidebar.ArticlesHighlighted }}class="active"{{end}} href="/articles">Articles</a>
-            <ul class="expanded">
+            <a {{ if eq .Key "home" }}class="active"{{end}} href="/home">Home</a>
+        </li>
+        <li>
+            <a {{ if .Sidebar.ArticlesHighlighted }}class="active"{{ end }} href="/articles">Articles</a>
+            <ul {{ if .Sidebar.ArticlesHighlighted }}class="expanded"{{ end }}>
                 <li>
                     <a {{ if .Sidebar.GroupedByDateHighlighted }}class="active"{{end}} href="/articles">Grouped by date</a>
                 </li>
@@ -42,17 +45,17 @@
             </ul>
         </li>
         <li>
-            <a {{ if .Sidebar.TagsHighlighted }}class="active"{{end}} href="/tags">Tags</a> <!-- this is important for highlighting -->
-            <ul class="expanded">
+            <a {{ if .Sidebar.TagsHighlighted }}class="active"{{ end }} href="/tags">Tags</a> <!-- this is important for highlighting -->
+            <ul {{ if gt (len .HighlightedTags) 0 }}class="expanded"{{ end }}>
                 {{ range .Tags }}
                 <li>
-                    <a {{ if $.IsHighlighted . }}class="active"{{end}} href="/tags/{{ . }}">{{ . }}</a>
+                    <a {{ if $.IsHighlighted . }}class="active"{{ end }} href="/tags/{{ . }}">{{ . }}</a>
                 </li>
                 {{ end }}
             </ul>
         </li>
         <li>
-            <a {{ if eq .Key "about" }}class="active"{{end}} href="/about">About</a>
+            <a {{ if eq .Key "about" }}class="active"{{ end }} href="/about">About</a>
         </li>
         </ul>
     </nav>
@@ -72,7 +75,7 @@
     <div class="inner">
         <footer>
           <div class="site-source">
-            <!-- TODO: add class for this?-->
+            <!-- TODO: Create a CSS class for "footer div.site-source p". -->
             <p style="padding-top: 3px;">{{ .FooterText }}</p>
           </div>
         </footer>
@@ -81,22 +84,7 @@
         </a>
     </div> <!-- .inner -->
 
-    <!-- TODO: move to a script file -->
-    <script>
-        $('#scrollToTop').removeClass('no-js');
-        $(window).scroll(function() {
-          $(this).scrollTop() > 150
-            ? $('#scrollToTop').fadeIn()
-            : $('#scrollToTop').fadeOut();
-        });
-        $('#scrollToTop').click(function(e) {
-          e.preventDefault();
-          $("html, body").animate({
-              scrollTop: 0
-          }, "slow");
-          return false;
-        });
-    </script>
+    <script src="/assets/scroll.js"></script>
 </body>
 
 </html>

@@ -16,7 +16,6 @@ type Config struct {
 
 type Settings struct {
 	PublishPrivateArticles    bool          `json:"publish_private_articles"`
-	PublishPersonalArticles   bool          `json:"publish_personal_articles"`
 	RepositorySyncPeriod      string        `json:"repository_sync_period"`
 	RepositorySyncPeriodDur   time.Duration `json:"-"`
 	StaleFileCleanupPeriod    string        `json:"stale_file_cleanup_period"`

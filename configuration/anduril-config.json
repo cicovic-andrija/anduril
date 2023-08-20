@@ -11,6 +11,7 @@
             "url_prefix": "/assets/",
             "allowed": [
                 "styles.css",
+                "scroll.js",
                 "icons/favicon.ico",
                 "icons/code.png",
                 "icons/code@2x.png",
@@ -38,7 +39,6 @@
     },
     "settings": {
         "publish_private_articles": false,
-        "publish_personal_articles": true,
         "repository_sync_period": "5m",
         "stale_file_cleanup_period": "24h"
     }

@@ -19,12 +19,11 @@ const MarkdownExtension = ".md"
 
 // Tags which trigger special behavior or different way of rendering.
 const (
-	MetaPageTag        = "meta"
-	DraftTag           = "draft"
-	OutdatedTag        = "outdated"
-	PrivateArticleTag  = "private"
-	PersonalArticleTag = "my"
-	HiddenArticleTag   = "hidden"
+	MetaPageTag       = "meta"
+	DraftTag          = "draft"
+	OutdatedTag       = "outdated"
+	PrivateArticleTag = "private"
+	HiddenArticleTag  = "hidden"
 )
 
 type Article struct {
@@ -92,10 +91,6 @@ func (s *WebServer) scanDataFile(revision *Revision, fileName string) error {
 	}
 
 	if !s.settings.PublishPrivateArticles && slice.ContainsString(article.Tags, PrivateArticleTag) {
-		return nil
-	}
-
-	if !s.settings.PublishPersonalArticles && slice.ContainsString(article.Tags, PersonalArticleTag) {
 		return nil
 	}
 

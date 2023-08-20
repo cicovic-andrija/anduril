@@ -9,13 +9,13 @@ import (
 const (
 	// Top-level template for rendering HTML pages.
 	PageTemplate = "page-v2.html"
-	// Template for the Articles page.
+	// Template for the Articles page and tags pages.
 	ArticlesTemplate = "articles.html"
 	// Template for the Not Found page.
 	NotFoundTemplate = "404.html"
-	// Dynamic article content template name.
+	// Content placeholder template name.
 	ContentPlaceholderTemplate = "content"
-	// String format for dynamic templates that render article content.
+	// Content placeholder template format.
 	ContentPlaceholderTemplateFmt = "{{ template \"%s\" . }}"
 )
 
