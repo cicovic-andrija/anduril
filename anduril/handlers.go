@@ -72,8 +72,12 @@ func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	s.renderPage(w, &Page{Title: "Not Found", Is404: true})
+	s.renderPage(w, &Page{
+		Title:           "Not Found",
+		FooterText:      "Page Not Found",
+		contentTemplate: NotFoundTemplate,
+		isStatic:        true,
+	})
 }
 
 // FindAndLock is an https.Adapter generator used to make adapters for requests

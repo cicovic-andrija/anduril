@@ -3,6 +3,8 @@ package anduril
 import (
 	"errors"
 	"fmt"
+	"html/template"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -60,6 +62,25 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	}
 	sort.Strings(revision.SortedTags)
 
+	supportTemplates := []string{ArticlesTemplate}
+	for _, templateName := range supportTemplates {
+		var (
+			f   *os.File
+			t   *template.Template
+			err error
+		)
+		t, err = template.ParseFiles(s.env.TemplatePath(templateName))
+		if err == nil {
+			f, err = os.Create(filepath.Join(s.env.CompiledWorkDirectory(), VersionedHTMLTemplate(strings.TrimSuffix(templateName, ".html"), revision.Hash)))
+		}
+		if err == nil {
+			err = t.Execute(f, revision)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to generate a support page from template %s: %v", templateName, err)
+		}
+	}
+
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
 			filepath.Join(revision.ContainerPath, article.File),                                             // input file
@@ -70,6 +91,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 		}
 	}
 
+	// TODO: Remove
 	sort.Slice(revision.SortedArticles, func(i, j int) bool {
 		return revision.SortedArticles[i].Title < revision.SortedArticles[j].Title
 	})
@@ -132,10 +154,6 @@ func (s *WebServer) scanDataFile(revision *Revision, fileName string) error {
 	)
 
 	return nil
-}
-
-func (s *WebServer) generateSupportingPages() {
-	// TODO
 }
 
 func (a *Article) Normalize() (err error) {

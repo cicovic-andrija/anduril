@@ -9,6 +9,10 @@ import (
 const (
 	// Top-level template for rendering HTML pages.
 	PageTemplate = "page-v2.html"
+	// Template for the Articles page.
+	ArticlesTemplate = "articles.html"
+	// Template for the Not Found page.
+	NotFoundTemplate = "404.html"
 	// Dynamic article content template name.
 	ContentPlaceholderTemplate = "content"
 	// String format for dynamic templates that render article content.
@@ -23,6 +27,7 @@ type Page struct {
 	Is404           bool
 	FooterText      string
 	contentTemplate string
+	isStatic        bool
 }
 
 func (p *Page) SlicedArticlesFirstPage() []*Article {
@@ -103,8 +108,12 @@ func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 	if err == nil {
 		if page.contentTemplate != "" {
 			contentPlaceholder := fmt.Sprintf(ContentPlaceholderTemplateFmt, page.contentTemplate)
+			contentTemplatePath := s.env.CompiledTemplatePath(page.contentTemplate)
+			if page.isStatic {
+				contentTemplatePath = s.env.TemplatePath(page.contentTemplate)
+			}
 			t.New(ContentPlaceholderTemplate).Parse(contentPlaceholder)
-			_, err = t.ParseFiles(s.env.CompiledTemplatePath(page.contentTemplate))
+			_, err = t.ParseFiles(contentTemplatePath)
 		} else {
 			t.New(ContentPlaceholderTemplate).Parse("")
 		}
