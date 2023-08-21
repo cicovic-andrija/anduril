@@ -15,8 +15,8 @@
         <header>
             <a href="/"><img src="/assets/icons/lionfish.png" width="128" height="128" alt="lionfish" /></a>
             <span id="tagline">--my-document-archive</span>
-            <form id="search" action="/search/results">
-                <input id="search-text" name="search" placeholder="Search..." autocomplete="off" type="text" />
+            <form id="search" action="/search">
+                <input id="search-text" name="what" placeholder="Search..." autocomplete="off" type="text" />
             </form>
             <div id="search-results"></div>
         </header>
@@ -70,10 +70,10 @@
 
     <div class="inner">
         <footer>
-          <div class="site-source">
-            <!-- TODO: Create a CSS class for "footer div.site-source p". -->
-            <p style="padding-top: 3px;">{{ .FooterText }}</p>
-          </div>
+            <div class="site-source">
+                <!-- TODO: Create a CSS class for "footer div.site-source p". -->
+                <p style="padding-top: 3px;">{{ .FooterText }}</p>
+            </div>
         </footer>
         <a href="#top" class="no-js scrollToTop" id="scrollToTop" data-label="Scroll to top">
             <img src="/assets/icons/chevron-up@2x.png" width="20" height="20" alt="scroll-to-top" />

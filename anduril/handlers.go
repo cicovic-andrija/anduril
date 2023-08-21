@@ -88,8 +88,17 @@ func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) 
 	s.renderPage(w, &Page{
 		Key:             "404",
 		Title:           "Not Found",
-		FooterText:      "Page Not Found",
+		FooterText:      "Page not found.",
 		contentTemplate: NotFoundTemplate,
+	})
+}
+
+func (s *WebServer) SearchResultsHandler(w http.ResponseWriter, r *http.Request) {
+	s.renderPage(w, &Page{
+		Key:             "search",
+		Title:           "Search",
+		FooterText:      "You can use the sidebar to explore the website.",
+		contentTemplate: SearchResultsTemplate,
 	})
 }
 
@@ -165,6 +174,13 @@ func (s *WebServer) registerHandlers() {
 			http.HandlerFunc(s.ArticleHandlerLocked),
 			s.FindAndLock(ArticleObject),
 			https.StripPrefix("/"),
+		),
+	)
+
+	s.httpsServer.Handle(
+		"/search",
+		https.Adapt(
+			http.HandlerFunc(s.SearchResultsHandler),
 		),
 	)
 }

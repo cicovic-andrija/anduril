@@ -13,6 +13,8 @@ const (
 	ArticlesTemplate = "articles.html"
 	// Template for the Not Found page.
 	NotFoundTemplate = "404.html"
+	// Template for the Search results page.
+	SearchResultsTemplate = "search.html"
 	// Content placeholder template name.
 	ContentPlaceholderTemplate = "content"
 	// Content placeholder template format.
