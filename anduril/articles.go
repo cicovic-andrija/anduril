@@ -20,11 +20,8 @@ const MarkdownExtension = ".md"
 
 // Tags which trigger special behavior or different way of rendering.
 const (
-	MetaPageTag       = "meta"
 	DraftTag          = "draft"
-	OutdatedTag       = "outdated"
 	PrivateArticleTag = "private"
-	HiddenArticleTag  = "hidden"
 )
 
 type Article struct {
