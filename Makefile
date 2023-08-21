@@ -2,32 +2,47 @@
 #
 
 OUTPUT_DIR = out
-SERVER_BIN = anduril-server
-MKCONF_PATH = $(OUTPUT_DIR)/mkconf
+DATA_DIR = $(OUTPUT_DIR)/data
+SERVER_BIN = $(OUTPUT_DIR)/anduril-server
+MKCONF = $(OUTPUT_DIR)/mkconf
+CONFIG_TEMPLATE = configuration/anduril-config.json
+CONFIG_FILE = $(DATA_DIR)/encrypted-config.txt
 
 .PHONY: build
-build: | $(OUTPUT_DIR)
-	go build -o $(OUTPUT_DIR)/$(SERVER_BIN) main.go
+build: css | $(OUTPUT_DIR)
+	go build -o $(SERVER_BIN) main.go
 
-.PHONY: tools
+.PHONY: css
+css:
+	sass assets/stylesheets/main.scss:assets/stylesheets/styles.css
+
+.PHONY: config
+config: tools
+	$(MKCONF) \
+		--template $(CONFIG_TEMPLATE) \
+		--to $(CONFIG_FILE) \
+		--profile prod \
+		--decrypt | jq
+
+.PHONY: tools | $(OUTPUT_DIR)
 tools: | $(OUTPUT_DIR)
-	go build -o $(MKCONF_PATH) ./tools/mkconf.go
+	go build -o $(MKCONF) ./tools/mkconf.go
 
 .PHONY: all
-all: $(OUTPUT_DIR) build tools
+all: $(OUTPUT_DIR) build tools config
 
 .PHONY: devenv
 devenv: build tools
-	mkdir -p $(OUTPUT_DIR)/data
-	cp -r templates $(OUTPUT_DIR)/data
-	cp -r static $(OUTPUT_DIR)/data
-	$(MKCONF_PATH) \
-		--template configuration/anduril-config.json \
-		--to $(OUTPUT_DIR)/data/encrypted-config.txt \
+	mkdir -p $(DATA_DIR)/assets
+	rsync -rv assets/templates $(DATA_DIR)/
+	rsync -v assets/scripts/*.js $(DATA_DIR)/assets/
+	rsync -v assets/stylesheets/*.css $(DATA_DIR)/assets/
+	rsync -rv assets/icons $(DATA_DIR)/assets/
+	$(MKCONF) \
+		--template $(CONFIG_TEMPLATE) \
+		--to $(CONFIG_FILE) \
 		--profile dev \
-		--password v1.0.3-7841277 \
-		--salt d3c24a79-c533-4e2d-974a-b4aab92198a6 \
-		--decrypt
+		--decrypt | jq
 	openssl req \
 		-x509 \
 		-newkey rsa:4096 \
@@ -40,16 +55,16 @@ devenv: build tools
 		>/dev/null 2>/dev/null
 
 $(OUTPUT_DIR):
-	mkdir -p $(OUTPUT_DIR)
+	mkdir -p $(DATA_DIR)
 
 .PHONY: clean
 clean:
 	rm -rf $(OUTPUT_DIR)/logs
 	rm -rf $(OUTPUT_DIR)/work
-	rm -rf $(OUTPUT_DIR)/data
 	rm -f $(OUTPUT_DIR)/tls*
-	rm -f $(OUTPUT_DIR)/$(SERVER_BIN)
-	rm -f $(MKCONF_PATH)
+	rm -rf $(DATA_DIR)
+	rm -f $(SERVER_BIN)
+	rm -f $(MKCONF)
 
 .PHONY: tidy
 tidy:

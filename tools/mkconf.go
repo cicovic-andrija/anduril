@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/cicovic-andrija/anduril/anduril"
+	"github.com/cicovic-andrija/anduril/service"
 	"github.com/cicovic-andrija/libgo/crypto"
 	"github.com/cicovic-andrija/libgo/fs"
 )
@@ -44,11 +45,11 @@ func parseOptions() (opt options) {
 	}
 
 	if opt.password == "" {
-		die("password not provided")
+		opt.password = service.Version
 	}
 
 	if opt.salt == "" {
-		die("salt not provided")
+		opt.salt = service.Build
 	}
 
 	return

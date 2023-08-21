@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="author" content="Andrija Cicović">
+    <link rel="stylesheet" media="screen" href="/assets/styles.css">
+    <link href="/assets/icons/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <title>{{ .Title }}</title>
+</head>
+
+<body>
+    <div class="inner">
+        <header>
+            <a href="/"><img src="/assets/icons/lionfish.png" width="128" height="128" alt="lionfish" /></a>
+            <span id="tagline">--my-document-archive</span>
+            <form id="search" action="/search">
+                <input id="search-text" name="what" placeholder="Search..." autocomplete="off" type="text" />
+            </form>
+            <div id="search-results"></div>
+        </header>
+    </div> <!-- .inner -->
+
+    <div class="inner">
+    <div id="content-wrapper">
+
+    <aside class="sidebar" id="sidebar">
+    <nav>
+        <ul>
+        <li>
+            <a {{ if eq .Key "home" }}class="active"{{end}} href="/home">Home</a>
+        </li>
+        <li>
+            <a {{ if .Sidebar.ArticlesHighlighted }}class="active"{{ end }} href="/articles">Articles</a>
+            <ul {{ if .Sidebar.ArticlesHighlighted }}class="expanded"{{ end }}>
+                <li>
+                    <a {{ if .Sidebar.GroupedByDateHighlighted }}class="active"{{end}} href="/articles?group-by=date">Grouped by date</a>
+                </li>
+                <li>
+                    <a {{ if .Sidebar.GroupedByTitleHighlighted }}class="active"{{end}} href="/articles?group-by=title">Grouped by title</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a {{ if .Sidebar.TagsHighlighted }}class="active"{{ end }} href="/tags">Tags</a>
+            <ul {{ if gt (len .HighlightedTags) 0 }}class="expanded"{{ end }}>
+                {{ range .Tags }}
+                <li>
+                    <a {{ if $.IsHighlighted . }}class="active"{{ end }} href="/tags/{{ . }}">{{ . }}</a>
+                </li>
+                {{ end }}
+            </ul>
+        </li>
+        <li>
+            <a {{ if eq .Key "about" }}class="active"{{ end }} href="/about">About</a>
+        </li>
+        </ul>
+    </nav>
+    </aside>
+
+    <div id="content">
+    <div id="main">
+    {{ template "content" . }}
+    </div> <!-- #main -->
+    </div> <!-- #content -->
+
+    </div> <!-- #content-wrapper -->
+    </div> <!-- .inner -->
+
+    <div class="inner">
+        <footer>
+            <div class="site-source">
+                <!-- TODO: Create a CSS class for "footer div.site-source p". -->
+                <p style="padding-top: 3px;">{{ .FooterText }}</p>
+            </div>
+        </footer>
+        <a href="#top" class="no-js scrollToTop" id="scrollToTop" data-label="Scroll to top">
+            <img src="/assets/icons/chevron-up@2x.png" width="20" height="20" alt="scroll-to-top" />
+        </a>
+    </div> <!-- .inner -->
+
+    <script src="/assets/scroll.js"></script>
+    <script src="/assets/search.js"></script>
+</body>
+</html>

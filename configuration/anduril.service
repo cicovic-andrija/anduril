@@ -1,6 +1,7 @@
 [Unit]
-Description=Notes Web Server
-After=network.target
+Description=Anduril Article Server
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple

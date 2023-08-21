@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/cicovic-andrija/anduril/yfm"
 	"github.com/cicovic-andrija/libgo/fs"
@@ -19,11 +20,8 @@ const MarkdownExtension = ".md"
 
 // Tags which trigger special behavior or different way of rendering.
 const (
-	MetaPageTag        = "meta"
-	DraftTag           = "draft"
-	OutdatedTag        = "outdated"
-	PrivateArticleTag  = "private"
-	PersonalArticleTag = "my"
+	DraftTag          = "draft"
+	PrivateArticleTag = "private"
 )
 
 type Article struct {
@@ -46,7 +44,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 				s.warn("file %s does not have the expected extension %q and will not been processed", fileName, MarkdownExtension)
 				return
 			}
-			if err := s.processDataFile(revision, fileName); err != nil {
+			if err := s.scanDataFile(revision, fileName); err != nil {
 				s.warn("failed to process data file %s: %v", fileName, err)
 			}
 		},
@@ -54,29 +52,33 @@ func (s *WebServer) processRevision(revision *Revision) error {
 		return fmt.Errorf("failed to process data batch: %v", err)
 	}
 
-	for tag := range revision.Tags {
-		revision.SortedTags = append(revision.SortedTags, tag)
-	}
-	sort.Strings(revision.SortedTags)
+	// Axiom: There is at least one article.
 
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
-			filepath.Join(revision.ContainerPath, article.File),
-			filepath.Join(s.env.CompiledWorkDirectory(), article.VersionedHTMLTemplate(revision.Hash)),
+			filepath.Join(revision.ContainerPath, article.File),                                             // input file
+			filepath.Join(s.env.CompiledWorkDirectory(), VersionedHTMLTemplate(article.Key, revision.Hash)), // output file
 		)
 		if err != nil {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)
 		}
 	}
 
-	sort.Slice(revision.SortedArticles, func(i, j int) bool {
-		return revision.SortedArticles[i].Title < revision.SortedArticles[j].Title
-	})
+	// Sort out tags.
+	for tag := range revision.Tags {
+		revision.SortedTags = append(revision.SortedTags, tag)
+	}
+	sort.Strings(revision.SortedTags)
+	revision.DefaultTag = revision.SortedTags[0]
+
+	// Sort out articles into groups.
+	groupByDate(revision)
+	groupByTitle(revision)
 
 	return nil
 }
 
-func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
+func (s *WebServer) scanDataFile(revision *Revision, fileName string) error {
 	file, err := fs.OpenFile(filepath.Join(revision.ContainerPath, fileName))
 	if err != nil {
 		return err
@@ -95,19 +97,12 @@ func (s *WebServer) processDataFile(revision *Revision, fileName string) error {
 		return nil
 	}
 
-	if !s.settings.PublishPersonalArticles && slice.ContainsString(article.Tags, PersonalArticleTag) {
-		return nil
-	}
-
 	if err := article.Normalize(); err != nil {
 		return fmt.Errorf("invalid metadata: %v", err)
 	}
 
 	// Cache article by key.
 	revision.Articles[article.Key] = article
-
-	// Note: will be sorted later.
-	revision.SortedArticles = append(revision.SortedArticles, article)
 
 	// Ensure every article is tagged; articles without tags are viewed as incomplete.
 	if len(article.Tags) == 0 {
@@ -160,14 +155,52 @@ func (a *Article) Normalize() (err error) {
 	return nil
 }
 
-func (a *Article) VersionedHTMLTemplate(versionHash string) string {
-	return fmt.Sprintf("%s%s", a.Key, VersionedArticleTemplateSuffix(versionHash))
+func (a *Article) ModifiedDate() string {
+	return a.ModifiedTime.Format("Jan 2 2006.")
 }
 
-func (a *Article) LastModificationDateMessage() string {
-	return fmt.Sprintf("Last updated on %s", a.ModifiedTime.Format("Jan 2 2006."))
+func groupByDate(revision *Revision) {
+	groupMap := make(map[string]ArticleGroup)
+	for _, article := range revision.Articles {
+		groupTitle := article.ModifiedTime.Format("January 2006.")
+		group, found := groupMap[groupTitle]
+		if !found {
+			group = ArticleGroup{
+				GroupTitle: groupTitle,
+			}
+		}
+		group.Articles = append(group.Articles, article)
+		groupMap[groupTitle] = group
+	}
+
+	revision.GroupsByDate = make([]ArticleGroup, 0, len(groupMap))
+	for _, group := range groupMap {
+		revision.GroupsByDate = append(revision.GroupsByDate, group)
+	}
+	sort.Slice(revision.GroupsByDate, func(i, j int) bool {
+		return revision.GroupsByDate[i].Articles[0].ModifiedTime.After(revision.GroupsByDate[j].Articles[0].ModifiedTime)
+	})
 }
 
-func VersionedArticleTemplateSuffix(versionHash string) string {
-	return fmt.Sprintf("_%s.html", versionHash)
+func groupByTitle(revision *Revision) {
+	groupMap := make(map[string]ArticleGroup)
+	for _, article := range revision.Articles {
+		groupTitle := string(unicode.ToUpper([]rune(article.Title)[0]))
+		group, found := groupMap[groupTitle]
+		if !found {
+			group = ArticleGroup{
+				GroupTitle: groupTitle,
+			}
+		}
+		group.Articles = append(group.Articles, article)
+		groupMap[groupTitle] = group
+	}
+
+	revision.GroupsByTitle = make([]ArticleGroup, 0, len(groupMap))
+	for _, group := range groupMap {
+		revision.GroupsByTitle = append(revision.GroupsByTitle, group)
+	}
+	sort.Slice(revision.GroupsByTitle, func(i, j int) bool {
+		return revision.GroupsByTitle[i].GroupTitle < revision.GroupsByTitle[j].GroupTitle
+	})
 }

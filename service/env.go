@@ -117,8 +117,8 @@ func (env *Environment) TemplatePath(templateName string) string {
 	return filepath.Join(env.DataDirectoryPath(), "templates", templateName)
 }
 
-func (env *Environment) StaticDataDirectory() string {
-	return filepath.Join(env.DataDirectoryPath(), "static")
+func (env *Environment) AssetsDataDirectory() string {
+	return filepath.Join(env.DataDirectoryPath(), "assets")
 }
 
 func (env *Environment) RepositoryWorkingDirectory() string {

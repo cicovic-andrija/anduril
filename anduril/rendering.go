@@ -8,29 +8,37 @@ import (
 
 const (
 	// Top-level template for rendering HTML pages.
-	PageTemplate = "page.html"
-	// Dynamic article content template name.
-	ArticleContentTextTemplate = "articleContent"
-	// String format for dynamic templates that render article content.
-	ArticleContentTextTemplateFmt = "{{ template \"%s\" . }}"
+	PageTemplate = "page-v2.html"
+	// Template for the Articles page and tags pages.
+	ArticlesTemplate = "articles.html"
+	// Template for the Not Found page.
+	NotFoundTemplate = "404.html"
+	// Template for the Search results page.
+	SearchResultsTemplate = "search.html"
+	// Content placeholder template name.
+	ContentPlaceholderTemplate = "content"
+	// Content placeholder template format.
+	ContentPlaceholderTemplateFmt = "{{ template \"%s\" . }}"
 )
 
 type Page struct {
+	Key             string
 	Title           string
-	Articles        []*Article
+	Sidebar         Sidebar
 	Tags            []string
 	HighlightedTags []string
-	Is404           bool
+	Articles        []*Article
+	ArticleGroups   []ArticleGroup
 	FooterText      string
 	contentTemplate string
+	alreadyCompiled bool
 }
 
-func (p *Page) SlicedArticlesFirstPage() []*Article {
-	return p.Articles[0 : len(p.Articles)/2+len(p.Articles)%2]
-}
-
-func (p *Page) SlicedArticlesSecondPage() []*Article {
-	return p.Articles[len(p.Articles)/2+len(p.Articles)%2 : len(p.Articles)]
+type Sidebar struct {
+	ArticlesHighlighted       bool
+	GroupedByTitleHighlighted bool
+	GroupedByDateHighlighted  bool
+	TagsHighlighted           bool
 }
 
 func (p *Page) IsHighlighted(tag string) bool {
@@ -42,58 +50,60 @@ func (p *Page) IsHighlighted(tag string) bool {
 	return false
 }
 
-func (p *Page) IsHighlightedRed(tag string) bool {
-	return tag == DraftTag || tag == OutdatedTag
-}
-
-func (p *Page) IsArticleListVisible() bool {
-	return (len(p.Articles) > 1) || (len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.contentTemplate == "")
-}
-
-func (p *Page) IsTagListVisible() bool {
-	return len(p.Tags) > 0 && !(len(p.Articles) == 1 && len(p.HighlightedTags) == 1 && p.HighlightedTags[0] == MetaPageTag)
-}
-
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
-	footerText := article.LastModificationDateMessage()
+	footerText := fmt.Sprintf("Last updated on %s", article.ModifiedTime.Format("Jan 2 2006."))
 	if article.Comment != "" {
 		footerText = article.Comment
 	}
 
 	return s.renderPage(w, &Page{
+		Key:             article.Key,
 		Title:           article.Title,
-		Articles:        []*Article{article},
+		Tags:            revision.SortedTags,
 		HighlightedTags: append([]string{}, article.Tags...),
-		Tags:            revision.SortedTags,
 		FooterText:      footerText,
-		contentTemplate: article.VersionedHTMLTemplate(revision.Hash),
+		contentTemplate: VersionedHTMLTemplate(article.Key, revision.Hash),
+		alreadyCompiled: true,
 	})
 }
 
-func (s *WebServer) renderListOfAllArticles(w io.Writer, revision *Revision) error {
-	return s.renderPage(w, &Page{
-		Title:      "Articles",
-		Articles:   revision.SortedArticles,
-		FooterText: fmt.Sprintf("There are %d articles listed.", len(revision.SortedArticles)),
-	})
-}
+func (s *WebServer) renderArticleList(w io.Writer, revision *Revision, groupBy string) error {
+	var (
+		articleGroups []ArticleGroup
+		sidebar       = Sidebar{ArticlesHighlighted: true}
+	)
 
-func (s *WebServer) renderListOfAllArticlesForTag(w io.Writer, tag string, articles []*Article, revision *Revision) error {
+	if groupBy == "date" {
+		sidebar.GroupedByDateHighlighted = true
+		articleGroups = revision.GroupsByDate
+	} else { // "title"
+		sidebar.GroupedByTitleHighlighted = true
+		articleGroups = revision.GroupsByTitle
+	}
+
 	return s.renderPage(w, &Page{
-		Title:           tag,
-		Articles:        articles,
-		HighlightedTags: []string{tag},
+		Key:             "articles",
+		Title:           "Articles",
+		Sidebar:         sidebar,
 		Tags:            revision.SortedTags,
-		FooterText:      fmt.Sprintf("There are %d articles listed.", len(articles)),
+		ArticleGroups:   articleGroups,
+		FooterText:      fmt.Sprintf("There are %d articles listed.", len(revision.Articles)),
+		contentTemplate: ArticlesTemplate,
 	})
 }
 
-func (s *WebServer) renderListOfTaggedArticles(w io.Writer, revision *Revision) error {
+func (s *WebServer) renderArticleListForTag(w io.Writer, tag string, articles []*Article, revision *Revision) error {
 	return s.renderPage(w, &Page{
-		Title:      "Tags",
-		Articles:   revision.SortedArticles,
-		Tags:       revision.SortedTags,
-		FooterText: fmt.Sprintf("There are %d tags listed.", len(revision.SortedTags)),
+		Key:   tag,
+		Title: tag,
+		Sidebar: Sidebar{
+			TagsHighlighted: true,
+		},
+		Tags:            revision.SortedTags,
+		HighlightedTags: []string{tag},
+		Articles:        articles,
+		FooterText:      fmt.Sprintf("There are %d articles listed.", len(articles)),
+		contentTemplate: ArticlesTemplate,
 	})
 }
 
@@ -101,14 +111,23 @@ func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 	t, err := template.ParseFiles(s.env.TemplatePath(PageTemplate))
 	if err == nil {
 		if page.contentTemplate != "" {
-			t.New(ArticleContentTextTemplate).Parse(fmt.Sprintf(ArticleContentTextTemplateFmt, page.contentTemplate))
-			_, err = t.ParseFiles(s.env.CompiledTemplatePath(page.contentTemplate))
+			contentPlaceholder := fmt.Sprintf(ContentPlaceholderTemplateFmt, page.contentTemplate)
+			contentTemplatePath := s.env.CompiledTemplatePath(page.contentTemplate)
+			if !page.alreadyCompiled {
+				contentTemplatePath = s.env.TemplatePath(page.contentTemplate)
+			}
+			t.New(ContentPlaceholderTemplate).Parse(contentPlaceholder)
+			_, err = t.ParseFiles(contentTemplatePath)
 		} else {
-			t.New(ArticleContentTextTemplate).Parse("")
+			t.New(ContentPlaceholderTemplate).Parse("")
 		}
 	}
 	if err != nil {
 		return fmt.Errorf("failed to parse one or more template files: %v", err)
 	}
 	return t.ExecuteTemplate(w, PageTemplate, page)
+}
+
+func VersionedHTMLTemplate(baseName string, versionHash string) string {
+	return fmt.Sprintf("%s_%s.html", baseName, versionHash)
 }

@@ -8,13 +8,19 @@
         },
         "enable_file_server": true,
         "file_server": {
-            "directory": "static",
-            "url_prefix": "/static/",
+            "url_prefix": "/assets/",
             "allowed": [
-                "frontendProcessing.js",
-                "stylesheet.css",
-                "bootstrap.bundle.min.js",
-                "bootstrap.min.css"
+                "styles.css",
+                "scroll.js",
+                "search.js",
+                "icons/favicon.ico",
+                "icons/code.png",
+                "icons/code@2x.png",
+                "icons/search.png",
+                "icons/search@2x.png",
+                "icons/chevron-up@2x.png",
+                "icons/lionfish.png",
+                "icons/octopus.png"
             ]
         },
         "log_requests": true,
@@ -35,8 +41,7 @@
     },
     "settings": {
         "publish_private_articles": false,
-        "publish_personal_articles": true,
-        "repository_sync_period": "15m",
+        "repository_sync_period": "5m",
         "stale_file_cleanup_period": "24h"
     }
 }
