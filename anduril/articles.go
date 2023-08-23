@@ -64,8 +64,12 @@ func (s *WebServer) processRevision(revision *Revision) error {
 		}
 	}
 
-	// Sort out tags.
-	for tag := range revision.Tags {
+	// Sort out tags and associated articles.
+	for tag, articles := range revision.Tags {
+		sort.Slice(articles, func(i, j int) bool {
+			return articles[i].ModifiedTime.After(articles[j].ModifiedTime)
+		})
+
 		revision.SortedTags = append(revision.SortedTags, tag)
 	}
 	sort.Strings(revision.SortedTags)
