@@ -26,8 +26,8 @@ const (
 // Version and build.
 // TODO: Thid could be set at link-time but -X linker option wasn't doing the trick. Investigate.
 var (
-	Version = "v2.0.0-03d7ccb"
-	Build   = "6d2b5a62-bcea-4838-9e9b-f9ad8cb42303"
+	Version = "v2.0.1-48709c5"
+	Build   = "76080da9-ed94-412a-afd8-d1fe90301297"
 )
 
 type Environment struct {
