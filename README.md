@@ -32,7 +32,7 @@ everything.
 
 ### Release Branch and Versioning
 
-1. Deployment to production should be done from the `release` branch: `git checkout release`.
+1. Deployment to production should be done from the `release` branch: `git checkout release; git merge master`.
 2. Update and commit the `Version` and `Build` info in `service/env.go` before executing any `make` targets.
 3. Once the steps in the Deployment (next) section are completed, merge the `release` into the `master` branch:
    `git checkout master; git merge release`.
