@@ -34,7 +34,7 @@ everything.
 
 1. Deployment to production should be done from the `release` branch: `git checkout release`.
 2. Update and commit the `Version` and `Build` info in `service/env.go` before executing any `make` targets.
-3. Once the setps in the Deployment (next) section are completed, merge the `release` into the `master` branch:
+3. Once the steps in the Deployment (next) section are completed, merge the `release` into the `master` branch:
    `git checkout master; git merge release`.
 
 ### Deployment
@@ -84,6 +84,12 @@ rsync -v assets/scripts/*.js root@notes.acicovic.me:/srv/anduril/data/assets/
 rsync -v assets/stylesheets/*.css root@notes.acicovic.me:/srv/anduril/data/assets/
 rsync -rv assets/icons root@notes.acicovic.me:/srv/anduril/data/assets/
 ```
+
+# How To Renew HTTPS Certificate Using Certbot
+
+1. Temporarily allow TCP connectivity on port 80 (HTTP), e.g. on Ubuntu: `ufw allow 80` (validate with `ufw status`).
+2. Run the renewal command: `certbot renew` (renews all certificates).
+3. Block TCP connectivity on port 80 (HTTP), e.g. on Ubuntu: `ufw deny 80` (validate with `ufw status`).
 
 # Local Log Monitoring
 

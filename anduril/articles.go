@@ -20,7 +20,7 @@ const MarkdownExtension = ".md"
 
 // Tags which trigger special behavior or different way of rendering.
 const (
-	DraftTag          = "draft"
+	InProgressTag     = "in-progress"
 	PrivateArticleTag = "private"
 )
 
@@ -110,7 +110,7 @@ func (s *WebServer) scanDataFile(revision *Revision, fileName string) error {
 
 	// Ensure every article is tagged; articles without tags are viewed as incomplete.
 	if len(article.Tags) == 0 {
-		article.Tags = []string{DraftTag}
+		article.Tags = []string{InProgressTag}
 	}
 
 	// Cache tags.
