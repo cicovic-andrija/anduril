@@ -56,8 +56,8 @@ func (s *WebServer) processRevision(revision *Revision) error {
 
 	for _, article := range revision.Articles {
 		err := s.executor.ConvertMarkdownToHTML(
-			filepath.Join(revision.ContainerPath, article.File),                                             // input file
-			filepath.Join(s.env.CompiledWorkDirectory(), VersionedHTMLTemplate(article.Key, revision.Hash)), // output file
+			filepath.Join(revision.ContainerPath, article.File),                                            // input file
+			filepath.Join(s.env.CompiledWorkDirectory(), compiledHTMLTemplate(article.Key, revision.Hash)), // output file
 		)
 		if err != nil {
 			s.warn("failed to convert %s to HTML: %v", article.File, err)

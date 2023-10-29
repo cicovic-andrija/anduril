@@ -9,12 +9,6 @@ import (
 const (
 	// Top-level template for rendering HTML pages.
 	PageTemplate = "page-v2.html"
-	// Template for the Articles page and tags pages.
-	ArticlesTemplate = "articles.html"
-	// Template for the Not Found page.
-	NotFoundTemplate = "404.html"
-	// Template for the Search results page.
-	SearchResultsTemplate = "search.html"
 	// Content placeholder template name.
 	ContentPlaceholderTemplate = "content"
 	// Content placeholder template format.
@@ -22,16 +16,16 @@ const (
 )
 
 type Page struct {
-	Key             string
-	Title           string
-	Sidebar         Sidebar
-	Tags            []string
-	HighlightedTags []string
-	Articles        []*Article
-	ArticleGroups   []ArticleGroup
-	FooterText      string
-	contentTemplate string
-	alreadyCompiled bool
+	Key               string
+	Title             string
+	Sidebar           Sidebar
+	Tags              []string
+	HighlightedTags   []string
+	Articles          []*Article
+	ArticleGroups     []ArticleGroup
+	FooterText        string
+	contentTemplate   string
+	isCompiledContent bool
 }
 
 type Sidebar struct {
@@ -40,6 +34,31 @@ type Sidebar struct {
 	GroupedByDateHighlighted  bool
 	TagsHighlighted           bool
 }
+
+var (
+	StaticPages = map[string]*Page{
+		"home": {
+			Key:        "home",
+			Title:      "The L-Archive",
+			FooterText: "The universe is transformation: life is opinion.",
+		},
+		"about": {
+			Key:        "about",
+			Title:      "About",
+			FooterText: "Made by Andrija Cicović, 2023.",
+		},
+		"search": {
+			Key:        "search",
+			Title:      "Search Results",
+			FooterText: "You can use the sidebar to explore the website.",
+		},
+		"404": {
+			Key:        "404",
+			Title:      "Not Found",
+			FooterText: "Page not found.",
+		},
+	}
+)
 
 func (p *Page) IsHighlighted(tag string) bool {
 	for _, highlighted := range p.HighlightedTags {
@@ -57,13 +76,13 @@ func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revis
 	}
 
 	return s.renderPage(w, &Page{
-		Key:             article.Key,
-		Title:           article.Title,
-		Tags:            revision.SortedTags,
-		HighlightedTags: append([]string{}, article.Tags...),
-		FooterText:      footerText,
-		contentTemplate: VersionedHTMLTemplate(article.Key, revision.Hash),
-		alreadyCompiled: true,
+		Key:               article.Key,
+		Title:             article.Title,
+		Tags:              revision.SortedTags,
+		HighlightedTags:   append([]string{}, article.Tags...),
+		FooterText:        footerText,
+		contentTemplate:   compiledHTMLTemplate(article.Key, revision.Hash),
+		isCompiledContent: true,
 	})
 }
 
@@ -82,13 +101,12 @@ func (s *WebServer) renderArticleList(w io.Writer, revision *Revision, groupBy s
 	}
 
 	return s.renderPage(w, &Page{
-		Key:             "articles",
-		Title:           "Articles",
-		Sidebar:         sidebar,
-		Tags:            revision.SortedTags,
-		ArticleGroups:   articleGroups,
-		FooterText:      fmt.Sprintf("There are %d articles listed.", len(revision.Articles)),
-		contentTemplate: ArticlesTemplate,
+		Key:           "articles",
+		Title:         "Articles",
+		Sidebar:       sidebar,
+		Tags:          revision.SortedTags,
+		ArticleGroups: articleGroups,
+		FooterText:    fmt.Sprintf("There are %d articles listed.", len(revision.Articles)),
 	})
 }
 
@@ -103,24 +121,25 @@ func (s *WebServer) renderArticleListForTag(w io.Writer, tag string, articles []
 		HighlightedTags: []string{tag},
 		Articles:        articles,
 		FooterText:      fmt.Sprintf("There are %d articles listed.", len(articles)),
-		contentTemplate: ArticlesTemplate,
+		contentTemplate: htmlTemplate("articles"),
 	})
 }
 
 func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 	t, err := template.ParseFiles(s.env.TemplatePath(PageTemplate))
 	if err == nil {
-		if page.contentTemplate != "" {
-			contentPlaceholder := fmt.Sprintf(ContentPlaceholderTemplateFmt, page.contentTemplate)
-			contentTemplatePath := s.env.CompiledTemplatePath(page.contentTemplate)
-			if !page.alreadyCompiled {
-				contentTemplatePath = s.env.TemplatePath(page.contentTemplate)
+		if page.contentTemplate == "" {
+			page.contentTemplate = htmlTemplate(page.Key)
+			if page.isCompiledContent {
+				panic(s.error("impossible server state: WebServer.renderPage: static page marked as isCompiledContent"))
 			}
-			t.New(ContentPlaceholderTemplate).Parse(contentPlaceholder)
-			_, err = t.ParseFiles(contentTemplatePath)
-		} else {
-			t.New(ContentPlaceholderTemplate).Parse("")
 		}
+		contentTemplatePath := s.env.TemplatePath(page.contentTemplate)
+		if page.isCompiledContent {
+			contentTemplatePath = s.env.CompiledTemplatePath(page.contentTemplate)
+		}
+		t.New(ContentPlaceholderTemplate).Parse(fmt.Sprintf(ContentPlaceholderTemplateFmt, page.contentTemplate))
+		_, err = t.ParseFiles(contentTemplatePath)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to parse one or more template files: %v", err)
@@ -128,6 +147,10 @@ func (s *WebServer) renderPage(w io.Writer, page *Page) error {
 	return t.ExecuteTemplate(w, PageTemplate, page)
 }
 
-func VersionedHTMLTemplate(baseName string, versionHash string) string {
-	return fmt.Sprintf("%s_%s.html", baseName, versionHash)
+func htmlTemplate(key string) string {
+	return fmt.Sprintf("%s.html", key)
+}
+
+func compiledHTMLTemplate(key string, versionHash string) string {
+	return fmt.Sprintf("%s_%s.html", key, versionHash)
 }

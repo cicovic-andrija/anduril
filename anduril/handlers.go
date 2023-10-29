@@ -19,15 +19,7 @@ func (s *WebServer) RootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *WebServer) ArticleRootHandler(w http.ResponseWriter, r *http.Request) {
-	if s.latestRevision == nil {
-		s.PageNotFoundHandler(w, r)
-		return
-	} else {
-		s.revisionLock.RLock()
-		defer s.revisionLock.RUnlock()
-	}
-
+func (s *WebServer) ArticleRootHandlerLocked(w http.ResponseWriter, r *http.Request) {
 	// By default, group articles by date.
 	groupArticlesBy := "date"
 	if r.URL.Query().Get("group-by") == "title" {
@@ -52,19 +44,11 @@ func (s *WebServer) ArticleHandlerLocked(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (s *WebServer) TagRootHandler(w http.ResponseWriter, r *http.Request) {
-	if s.latestRevision == nil {
-		s.PageNotFoundHandler(w, r)
-		return
-	} else {
-		s.revisionLock.RLock()
-		defer s.revisionLock.RUnlock()
-	}
-
+func (s *WebServer) TagRootHandlerLocked(w http.ResponseWriter, r *http.Request) {
 	tag := s.latestRevision.DefaultTag
 	articles := s.latestRevision.SearchByTag(tag)
 	if articles == nil {
-		panic(s.error("impossible server state: WebServer.TagRootHandler: articles must exist for tag but not found: tag: %s", tag))
+		panic(s.error("impossible server state: WebServer.TagRootHandlerLocked: articles must exist for tag but not found: tag: %s", tag))
 	}
 	err := s.renderArticleListForTag(w, tag, articles, s.latestRevision)
 	if err != nil {
@@ -84,43 +68,18 @@ func (s *WebServer) TagHandlerLocked(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	s.renderPage(w, &Page{
-		Key:             "404",
-		Title:           "Not Found",
-		FooterText:      "Page not found.",
-		contentTemplate: NotFoundTemplate,
-	})
-}
-
-func (s *WebServer) SearchResultsHandler(w http.ResponseWriter, r *http.Request) {
-	s.renderPage(w, &Page{
-		Key:             "search",
-		Title:           "Search",
-		FooterText:      "You can use the sidebar to explore the website.",
-		contentTemplate: SearchResultsTemplate,
-	})
-}
-
-// FindAndLock is an https.Adapter generator used to make adapters for requests
-// that require access to a specific object. If the object identified by URL path
-// exists, the current revision is read-locked until the underlying handler completes
-// processing the request.
-func (s *WebServer) FindAndLock(objectType ObjectType) https.Adapter {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			s.revisionLock.RLock()
-			if s.latestRevision == nil || !s.latestRevision.FindObject(r.URL.Path, objectType) {
-				s.revisionLock.RUnlock()
-				s.PageNotFoundHandler(w, r)
-				return
-			}
-
-			// Call the next handler in the chain.
-			h.ServeHTTP(w, r)
-			s.revisionLock.RUnlock()
-		})
+func (s *WebServer) StaticPageHandler(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Path
+	page, found := StaticPages[key]
+	if !found {
+		panic(s.error("impossible server state: WebServer.StaticPageHandler: key not found: %s", key))
 	}
+	s.renderPage(w, page)
+}
+
+func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	r.URL.Path = "404"
+	s.StaticPageHandler(w, r)
 }
 
 func (s *WebServer) registerHandlers() {
@@ -132,22 +91,24 @@ func (s *WebServer) registerHandlers() {
 	s.httpsServer.Handle(
 		"/home",
 		https.Adapt(
-			http.HandlerFunc(s.ArticleHandlerLocked),
-			s.FindAndLock(ArticleObject),
+			http.HandlerFunc(s.StaticPageHandler),
 			https.StripPrefix("/"),
 		),
 	)
 
 	s.httpsServer.Handle(
 		"/tags",
-		http.HandlerFunc(s.TagRootHandler),
+		https.Adapt(
+			http.HandlerFunc(s.TagRootHandlerLocked),
+			s.ReadLockRevision,
+		),
 	)
 
 	s.httpsServer.Handle(
 		"/tags/",
 		https.Adapt(
 			http.HandlerFunc(s.TagHandlerLocked),
-			s.FindAndLock(TagObject),
+			s.FindAndReadLockRevision(TagObject),
 			https.StripPrefix("/tags/"),
 			https.RedirectRootToParentTree,
 		),
@@ -155,14 +116,17 @@ func (s *WebServer) registerHandlers() {
 
 	s.httpsServer.Handle(
 		"/articles",
-		http.HandlerFunc(s.ArticleRootHandler),
+		https.Adapt(
+			http.HandlerFunc(s.ArticleRootHandlerLocked),
+			s.ReadLockRevision,
+		),
 	)
 
 	s.httpsServer.Handle(
 		"/articles/",
 		https.Adapt(
 			http.HandlerFunc(s.ArticleHandlerLocked),
-			s.FindAndLock(ArticleObject),
+			s.FindAndReadLockRevision(ArticleObject),
 			https.StripPrefix("/articles/"),
 			https.RedirectRootToParentTree,
 		),
@@ -171,8 +135,7 @@ func (s *WebServer) registerHandlers() {
 	s.httpsServer.Handle(
 		"/about",
 		https.Adapt(
-			http.HandlerFunc(s.ArticleHandlerLocked),
-			s.FindAndLock(ArticleObject),
+			http.HandlerFunc(s.StaticPageHandler),
 			https.StripPrefix("/"),
 		),
 	)
@@ -180,7 +143,8 @@ func (s *WebServer) registerHandlers() {
 	s.httpsServer.Handle(
 		"/search",
 		https.Adapt(
-			http.HandlerFunc(s.SearchResultsHandler),
+			http.HandlerFunc(s.StaticPageHandler),
+			https.StripPrefix("/"),
 		),
 	)
 }
