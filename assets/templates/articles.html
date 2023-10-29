@@ -1,8 +1,7 @@
 <h1>{{ if eq (len .HighlightedTags) 1 }}Articles tagged <a href="/tags/{{ index .HighlightedTags 0 }}">{{ index .HighlightedTags 0 }}</a>{{ else }}Articles{{ end }}</h1>
 {{ if gt (len .Articles) 0 }}
 {{ range .Articles }}
-<h3><a href="/articles/{{ .Key }}">{{ .Title }}</a></h3>
-<p><i>Last updated on {{ .ModifiedDate }}</i></p>
+<h3><a href="/articles/{{ .Key }}">{{ .Title }}</a> <small>| {{ .Type }}</small></h3>
 {{ end }}
 {{ else }}
 {{ range .ArticleGroups }}
