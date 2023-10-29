@@ -23,6 +23,7 @@ type Page struct {
 	HighlightedTags   []string
 	Articles          []*Article
 	ArticleGroups     []ArticleGroup
+	HeaderText        string
 	FooterText        string
 	contentTemplate   string
 	isCompiledContent bool
@@ -32,6 +33,7 @@ type Sidebar struct {
 	ArticlesHighlighted       bool
 	GroupedByTitleHighlighted bool
 	GroupedByDateHighlighted  bool
+	GroupedByTypeHighlighted  bool
 	TagsHighlighted           bool
 }
 
@@ -70,7 +72,7 @@ func (p *Page) IsHighlighted(tag string) bool {
 }
 
 func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revision) error {
-	footerText := fmt.Sprintf("Last updated on %s", article.ModifiedTime.Format("Jan 2 2006."))
+	footerText := fmt.Sprintf("Last updated on %s", article.ModifiedTime.Format("January 2 2006."))
 	if article.Comment != "" {
 		footerText = article.Comment
 	}
@@ -80,6 +82,7 @@ func (s *WebServer) renderArticle(w io.Writer, article *Article, revision *Revis
 		Title:             article.Title,
 		Tags:              revision.SortedTags,
 		HighlightedTags:   append([]string{}, article.Tags...),
+		HeaderText:        fmt.Sprintf("%s | %s", article.Type, article.CreatedTime.Format("January 2 2006.")),
 		FooterText:        footerText,
 		contentTemplate:   compiledHTMLTemplate(article.Key, revision.Hash),
 		isCompiledContent: true,
@@ -95,9 +98,12 @@ func (s *WebServer) renderArticleList(w io.Writer, revision *Revision, groupBy s
 	if groupBy == "date" {
 		sidebar.GroupedByDateHighlighted = true
 		articleGroups = revision.GroupsByDate
-	} else { // "title"
+	} else if groupBy == "title" {
 		sidebar.GroupedByTitleHighlighted = true
 		articleGroups = revision.GroupsByTitle
+	} else { // "type"
+		sidebar.GroupedByTypeHighlighted = true
+		articleGroups = revision.GroupsByType
 	}
 
 	return s.renderPage(w, &Page{

@@ -45,6 +45,7 @@ h1 {
   line-height: $base-line-height * 2;
 
   small {
+    font-variant: all-small-caps;
     font-size: 18px;
   }
 }
@@ -57,6 +58,7 @@ h2 {
   color: $orange;
 
   small {
+    font-variant: all-small-caps;
     font-size: 18px;
   }
 }
@@ -71,6 +73,7 @@ h3 {
   font-weight: bold;
 
   small {
+    font-variant: all-small-caps;
     font-size: 14px;
   }
 }
@@ -86,6 +89,7 @@ h4 {
   font-weight: bold;
 
   small {
+    font-variant: all-small-caps;
     font-size: 12px;
   }
 }

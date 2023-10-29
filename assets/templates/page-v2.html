@@ -41,6 +41,9 @@
                 <li>
                     <a {{ if .Sidebar.GroupedByTitleHighlighted }}class="active"{{end}} href="/articles?group-by=title">Grouped by title</a>
                 </li>
+                <li>
+                    <a {{ if .Sidebar.GroupedByTypeHighlighted }}class="active"{{end}} href="/articles?group-by=type">Grouped by type</a>
+                </li>
             </ul>
         </li>
         <li>
@@ -62,6 +65,7 @@
 
     <div id="content">
     <div id="main">
+    {{ if .HeaderText }}<h3><small>{{ .HeaderText }}</small></h3>{{ end }}
     {{ template "content" . }}
     </div> <!-- #main -->
     </div> <!-- #content -->

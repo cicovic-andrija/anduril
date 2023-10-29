@@ -8,7 +8,7 @@
 {{ range .ArticleGroups }}
 <h2>{{ .GroupTitle }}</h2>
 {{ range .Articles }}
-<h3><a href="/articles/{{ .Key }}">{{ .Title }}</a></h3>
+<h3><a href="/articles/{{ .Key }}">{{ .Title }}</a>{{ if not $.Sidebar.GroupedByTypeHighlighted }} <small>| {{ .Type }}</small>{{ end }}</h3>
 {{ end }}
 {{ end }}
 {{ end }}

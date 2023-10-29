@@ -26,6 +26,7 @@ const (
 
 type Article struct {
 	Title        string    `yaml:"title"`
+	Type         string    `yaml:"type"`
 	Comment      string    `yaml:"comment"`
 	Tags         []string  `yaml:"tags"`
 	Created      string    `yaml:"created"`
@@ -67,7 +68,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	// Sort out tags and associated articles.
 	for tag, articles := range revision.Tags {
 		sort.Slice(articles, func(i, j int) bool {
-			return articles[i].ModifiedTime.After(articles[j].ModifiedTime)
+			return articles[i].CreatedTime.After(articles[j].CreatedTime)
 		})
 
 		revision.SortedTags = append(revision.SortedTags, tag)
@@ -78,6 +79,7 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	// Sort out articles into groups.
 	groupByDate(revision)
 	groupByTitle(revision)
+	groupByType(revision)
 
 	return nil
 }
@@ -138,6 +140,10 @@ func (a *Article) Normalize() (err error) {
 		return
 	}
 
+	if a.Type == "" {
+		a.Type = "note"
+	}
+
 	if a.Created != "" {
 		a.CreatedTime, err = time.Parse(time.RFC3339, a.Created)
 		if err != nil {
@@ -159,14 +165,10 @@ func (a *Article) Normalize() (err error) {
 	return nil
 }
 
-func (a *Article) ModifiedDate() string {
-	return a.ModifiedTime.Format("Jan 2 2006.")
-}
-
 func groupByDate(revision *Revision) {
 	groupMap := make(map[string]ArticleGroup)
 	for _, article := range revision.Articles {
-		groupTitle := article.ModifiedTime.Format("January 2006.")
+		groupTitle := article.CreatedTime.Format("January 2006.")
 		group, found := groupMap[groupTitle]
 		if !found {
 			group = ArticleGroup{
@@ -182,7 +184,7 @@ func groupByDate(revision *Revision) {
 		revision.GroupsByDate = append(revision.GroupsByDate, group)
 	}
 	sort.Slice(revision.GroupsByDate, func(i, j int) bool {
-		return revision.GroupsByDate[i].Articles[0].ModifiedTime.After(revision.GroupsByDate[j].Articles[0].ModifiedTime)
+		return revision.GroupsByDate[i].Articles[0].CreatedTime.After(revision.GroupsByDate[j].Articles[0].CreatedTime)
 	})
 }
 
@@ -206,5 +208,37 @@ func groupByTitle(revision *Revision) {
 	}
 	sort.Slice(revision.GroupsByTitle, func(i, j int) bool {
 		return revision.GroupsByTitle[i].GroupTitle < revision.GroupsByTitle[j].GroupTitle
+	})
+}
+
+func groupByType(revision *Revision) {
+	groupMap := make(map[string]ArticleGroup)
+	for _, article := range revision.Articles {
+		var groupTitle string
+		switch article.Type {
+		case "blog":
+			groupTitle = "Blogs"
+		case "reference":
+			groupTitle = "References"
+		default:
+			groupTitle = "Notes"
+		}
+
+		group, found := groupMap[groupTitle]
+		if !found {
+			group = ArticleGroup{
+				GroupTitle: groupTitle,
+			}
+		}
+		group.Articles = append(group.Articles, article)
+		groupMap[groupTitle] = group
+	}
+
+	revision.GroupsByType = make([]ArticleGroup, 0, len(groupMap))
+	for _, group := range groupMap {
+		revision.GroupsByType = append(revision.GroupsByType, group)
+	}
+	sort.Slice(revision.GroupsByType, func(i, j int) bool {
+		return revision.GroupsByType[i].GroupTitle < revision.GroupsByType[j].GroupTitle
 	})
 }

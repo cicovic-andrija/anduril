@@ -16,6 +16,7 @@ type Revision struct {
 	Articles      map[string]*Article
 	GroupsByDate  []ArticleGroup
 	GroupsByTitle []ArticleGroup
+	GroupsByType  []ArticleGroup
 	Tags          map[string][]*Article
 	SortedTags    []string
 	DefaultTag    string

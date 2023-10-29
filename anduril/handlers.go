@@ -25,6 +25,9 @@ func (s *WebServer) ArticleRootHandlerLocked(w http.ResponseWriter, r *http.Requ
 	if r.URL.Query().Get("group-by") == "title" {
 		groupArticlesBy = "title"
 	}
+	if r.URL.Query().Get("group-by") == "type" {
+		groupArticlesBy = "type"
+	}
 
 	err := s.renderArticleList(w, s.latestRevision, groupArticlesBy)
 	if err != nil {
