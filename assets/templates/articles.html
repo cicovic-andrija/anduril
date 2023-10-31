@@ -5,7 +5,7 @@
 {{ end }}
 {{ else }}
 {{ range .ArticleGroups }}
-<h2>{{ .GroupTitle }}</h2>
+<h2>{{ .GroupName }}</h2>
 {{ range .Articles }}
 <h3><a href="/articles/{{ .Key }}">{{ .Title }}</a>{{ if not $.Sidebar.GroupedByTypeHighlighted }} <small>| {{ .Type }}</small>{{ end }}</h3>
 {{ end }}

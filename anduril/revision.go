@@ -25,8 +25,8 @@ type Revision struct {
 }
 
 type ArticleGroup struct {
-	GroupTitle string
-	Articles   []*Article
+	GroupName string
+	Articles  []*Article
 }
 
 func (r *Revision) FindObject(key string, objectType ObjectType) (found bool) {

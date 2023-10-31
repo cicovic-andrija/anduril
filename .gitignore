@@ -1,7 +1,6 @@
 *.txt
 *.json
 **/out/
-**/bootstrap*
 **/*.css
 **/*.css.map
 **/.sass-cache/

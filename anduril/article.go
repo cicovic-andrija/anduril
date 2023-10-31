@@ -77,9 +77,9 @@ func (s *WebServer) processRevision(revision *Revision) error {
 	revision.DefaultTag = revision.SortedTags[0]
 
 	// Sort out articles into groups.
-	groupByDate(revision)
-	groupByTitle(revision)
-	groupByType(revision)
+	revision.GroupsByDate = groupByDate(revision.Articles)
+	revision.GroupsByTitle = groupByTitle(revision.Articles)
+	revision.GroupsByType = groupByType(revision.Articles)
 
 	return nil
 }
@@ -165,80 +165,82 @@ func (a *Article) Normalize() (err error) {
 	return nil
 }
 
-func groupByDate(revision *Revision) {
-	groupMap := make(map[string]ArticleGroup)
-	for _, article := range revision.Articles {
-		groupTitle := article.CreatedTime.Format("January 2006.")
-		group, found := groupMap[groupTitle]
-		if !found {
-			group = ArticleGroup{
-				GroupTitle: groupTitle,
-			}
-		}
-		group.Articles = append(group.Articles, article)
-		groupMap[groupTitle] = group
-	}
-
-	revision.GroupsByDate = make([]ArticleGroup, 0, len(groupMap))
-	for _, group := range groupMap {
-		revision.GroupsByDate = append(revision.GroupsByDate, group)
-	}
-	sort.Slice(revision.GroupsByDate, func(i, j int) bool {
-		return revision.GroupsByDate[i].Articles[0].CreatedTime.After(revision.GroupsByDate[j].Articles[0].CreatedTime)
-	})
+type groupBy struct {
+	determineGroup func(*Article) string
+	sort           func(groups []ArticleGroup)
 }
 
-func groupByTitle(revision *Revision) {
+func (g groupBy) do(articles map[string]*Article) []ArticleGroup {
 	groupMap := make(map[string]ArticleGroup)
-	for _, article := range revision.Articles {
-		groupTitle := string(unicode.ToUpper([]rune(article.Title)[0]))
-		group, found := groupMap[groupTitle]
+	for _, article := range articles {
+		groupName := g.determineGroup(article)
+		group, found := groupMap[groupName]
 		if !found {
 			group = ArticleGroup{
-				GroupTitle: groupTitle,
+				GroupName: groupName,
 			}
 		}
 		group.Articles = append(group.Articles, article)
-		groupMap[groupTitle] = group
+		groupMap[groupName] = group
 	}
 
-	revision.GroupsByTitle = make([]ArticleGroup, 0, len(groupMap))
+	groups := make([]ArticleGroup, 0, len(groupMap))
 	for _, group := range groupMap {
-		revision.GroupsByTitle = append(revision.GroupsByTitle, group)
+		groups = append(groups, group)
 	}
-	sort.Slice(revision.GroupsByTitle, func(i, j int) bool {
-		return revision.GroupsByTitle[i].GroupTitle < revision.GroupsByTitle[j].GroupTitle
-	})
+
+	g.sort(groups)
+	return groups
 }
 
-func groupByType(revision *Revision) {
-	groupMap := make(map[string]ArticleGroup)
-	for _, article := range revision.Articles {
-		var groupTitle string
-		switch article.Type {
-		case "blog":
-			groupTitle = "Blogs"
-		case "reference":
-			groupTitle = "References"
-		default:
-			groupTitle = "Notes"
-		}
+func groupByDate(articles map[string]*Article) []ArticleGroup {
+	return groupBy{
+		determineGroup: func(article *Article) string {
+			return article.CreatedTime.Format("January 2006.")
+		},
+		sort: func(groups []ArticleGroup) {
+			sort.Slice(groups, func(i, j int) bool {
+				return groups[i].Articles[0].CreatedTime.After(groups[j].Articles[0].CreatedTime)
+			})
+		},
+	}.do(articles)
+}
 
-		group, found := groupMap[groupTitle]
-		if !found {
-			group = ArticleGroup{
-				GroupTitle: groupTitle,
+func groupByTitle(articles map[string]*Article) []ArticleGroup {
+	return groupBy{
+		determineGroup: func(article *Article) string {
+			return string(unicode.ToUpper([]rune(article.Title)[0]))
+		},
+		sort: func(groups []ArticleGroup) {
+			sort.Slice(groups, func(i, j int) bool {
+				return groups[i].GroupName < groups[j].GroupName
+			})
+		},
+	}.do(articles)
+}
+
+func groupByType(articles map[string]*Article) []ArticleGroup {
+	return groupBy{
+		determineGroup: func(article *Article) string {
+			switch article.Type {
+			case "blog":
+				return "Blogs"
+			case "essay":
+				return "Essays"
+			case "reference":
+				return "References"
+			case "digest":
+				return "Digests"
+			case "journal":
+				return "Journals"
+			default:
+				return "Notes"
 			}
-		}
-		group.Articles = append(group.Articles, article)
-		groupMap[groupTitle] = group
-	}
-
-	revision.GroupsByType = make([]ArticleGroup, 0, len(groupMap))
-	for _, group := range groupMap {
-		revision.GroupsByType = append(revision.GroupsByType, group)
-	}
-	sort.Slice(revision.GroupsByType, func(i, j int) bool {
-		return revision.GroupsByType[i].GroupTitle < revision.GroupsByType[j].GroupTitle
-	})
+		},
+		sort: func(groups []ArticleGroup) {
+			sort.Slice(groups, func(i, j int) bool {
+				return groups[i].GroupName < groups[j].GroupName
+			})
+		},
+	}.do(articles)
 }
