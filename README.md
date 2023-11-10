@@ -49,7 +49,8 @@ everything.
     3. Add the needed SSH public key fingerprints to the SSH `known_hosts` file.
     4. From the local machine, send the `systemd` service config file to the remote machine:
        `rsync -v ./configuration/anduril.service {username}@notes.acicovic.me:/etc/systemd/system/`.
-4. Sync all required working files to the remote machine with `rsync`, as described below.
+4. Sync all required working files to the remote machine with `rsync`, as described in
+   "How To Sync Files to the Remote Machine".
 5. Connect to the remote machine: `ssh {username}@notes.acicovic.me`.
 6. In case of first time deployments, execute `systemctl enable anduril.service` followed by
    `systemctl start anduril.service`; otherwise simply run `systemctl restart anduril.service`.

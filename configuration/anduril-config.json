@@ -3,8 +3,8 @@
         "network": {
             "ip_accept_host": "any",
             "tcp_port": 443,
-            "tls_cert_path": "/etc/letsencrypt/live/notes.acicovic.me/fullchain.pem",
-            "tls_key_path": "/etc/letsencrypt/live/notes.acicovic.me/privkey.pem"
+            "tls_cert_path": "/etc/letsencrypt/live/www.acicovic.me/fullchain.pem",
+            "tls_key_path": "/etc/letsencrypt/live/www.acicovic.me/privkey.pem"
         },
         "enable_file_server": true,
         "file_server": {
