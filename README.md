@@ -42,21 +42,21 @@ everything.
 1. Review and fill empty fields (passwords) where appropriate in the config file located in `configuration/`.
 2. Execute `make all` to build the server, accompanying tools and configuration files.
 3. In case of first-time deployments, the following requirements must be met on the remote server machine
-   (`notes.acicovic.me` host):
+   (`www.acicovic.me` host):
     1. Make sure `systemd`, `openssl`, `pandoc`, and `rsync` are installed on the system.
     2. Install the HTTPS certificate to the location indicated by the `https.network` section of the server's config
        file (e.g. instructions [https://letsencrypt.org/](https://letsencrypt.org/)).
     3. Add the needed SSH public key fingerprints to the SSH `known_hosts` file.
     4. From the local machine, send the `systemd` service config file to the remote machine:
-       `rsync -v ./configuration/anduril.service {username}@notes.acicovic.me:/etc/systemd/system/`.
+       `rsync -v ./configuration/anduril.service {username}@www.acicovic.me:/etc/systemd/system/`.
 4. Sync all required working files to the remote machine with `rsync`, as described in
    "How To Sync Files to the Remote Machine".
-5. Connect to the remote machine: `ssh {username}@notes.acicovic.me`.
+5. Connect to the remote machine: `ssh {username}@www.acicovic.me`.
 6. In case of first time deployments, execute `systemctl enable anduril.service` followed by
    `systemctl start anduril.service`; otherwise simply run `systemctl restart anduril.service`.
 7. Check the health status of the service: `systemctl status anduril.service`.
 8. Monitor the main log file for errors for the first 10 minutes of execution.
-9. Visit [https://notes.acicovic.me](https://notes.acicovic.me) in a web browser to confirm a new version has been
+9. Visit [https://www.acicovic.me](https://www.acicovic.me) in a web browser to confirm a new version has been
    successfully deployed.
 
 # Working Directory Structure
@@ -74,16 +74,16 @@ everything.
 # How To Sync Files to the Remote Machine
 
 ```
-ping notes.acicovic.me
-ssh root@notes.acicovic.me
+ping www.acicovic.me
+ssh root@www.acicovic.me
 mkdir -p /srv/anduril/data/assets
 exit
-rsync -v ./out/anduril-server root@notes.acicovic.me:/srv/anduril/
-rsync -v ./out/data/encrypted-config.txt root@notes.acicovic.me:/srv/anduril/data/
-rsync -rv assets/templates root@notes.acicovic.me:/srv/anduril/data/
-rsync -v assets/scripts/*.js root@notes.acicovic.me:/srv/anduril/data/assets/
-rsync -v assets/stylesheets/*.css root@notes.acicovic.me:/srv/anduril/data/assets/
-rsync -rv assets/icons root@notes.acicovic.me:/srv/anduril/data/assets/
+rsync -v ./out/anduril-server root@www.acicovic.me:/srv/anduril/
+rsync -v ./out/data/encrypted-config.txt root@www.acicovic.me:/srv/anduril/data/
+rsync -rv assets/templates root@www.acicovic.me:/srv/anduril/data/
+rsync -v assets/scripts/*.js root@www.acicovic.me:/srv/anduril/data/assets/
+rsync -v assets/stylesheets/*.css root@www.acicovic.me:/srv/anduril/data/assets/
+rsync -rv assets/icons root@www.acicovic.me:/srv/anduril/data/assets/
 ```
 
 # How To Renew HTTPS Certificate Using Certbot
@@ -95,7 +95,7 @@ rsync -rv assets/icons root@notes.acicovic.me:/srv/anduril/data/assets/
 # Local Log Monitoring
 
 ```
-ping notes.acicovic.me
-ssh root@notes.acicovic.me
+ping www.acicovic.me
+ssh root@www.acicovic.me
 tail -f logs/* | cut -d$'\t' -f4 # OR $ tail -f logs/*
 ```

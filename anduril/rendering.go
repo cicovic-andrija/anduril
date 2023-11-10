@@ -57,7 +57,7 @@ var (
 		"404": {
 			Key:        "404",
 			Title:      "Not Found",
-			FooterText: "Page not found.",
+			FooterText: "You can use the sidebar to explore the website.",
 		},
 	}
 )
