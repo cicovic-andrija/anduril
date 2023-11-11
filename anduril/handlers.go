@@ -80,6 +80,13 @@ func (s *WebServer) StaticPageHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, page)
 }
 
+func (s *WebServer) StaticPageRequestHandler() http.Handler {
+	return https.Adapt(
+		http.HandlerFunc(s.StaticPageHandler),
+		https.StripPrefix("/"),
+	)
+}
+
 func (s *WebServer) PageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = "404"
 	s.StaticPageHandler(w, r)
@@ -93,10 +100,7 @@ func (s *WebServer) registerHandlers() {
 
 	s.httpsServer.Handle(
 		"/home",
-		https.Adapt(
-			http.HandlerFunc(s.StaticPageHandler),
-			https.StripPrefix("/"),
-		),
+		s.StaticPageRequestHandler(),
 	)
 
 	s.httpsServer.Handle(
@@ -137,17 +141,16 @@ func (s *WebServer) registerHandlers() {
 
 	s.httpsServer.Handle(
 		"/about",
-		https.Adapt(
-			http.HandlerFunc(s.StaticPageHandler),
-			https.StripPrefix("/"),
-		),
+		s.StaticPageRequestHandler(),
 	)
 
 	s.httpsServer.Handle(
 		"/search",
-		https.Adapt(
-			http.HandlerFunc(s.StaticPageHandler),
-			https.StripPrefix("/"),
-		),
+		s.StaticPageRequestHandler(),
+	)
+
+	s.httpsServer.Handle(
+		"/look-and-feel",
+		s.StaticPageRequestHandler(),
 	)
 }

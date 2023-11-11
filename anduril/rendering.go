@@ -59,6 +59,11 @@ var (
 			Title:      "Not Found",
 			FooterText: "You can use the sidebar to explore the website.",
 		},
+		"look-and-feel": {
+			Key:        "look-and-feel",
+			Title:      "Page Title",
+			FooterText: "Footer text.",
+		},
 	}
 )
 
