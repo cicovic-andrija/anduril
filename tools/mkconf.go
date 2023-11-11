@@ -81,7 +81,7 @@ func replaceValues(template *anduril.Config, profile string) {
 		template.HTTPS.Network.IPAcceptHost = "any"
 		template.HTTPS.Network.TCPPort = 443
 		template.HTTPS.AllowOnlyGETRequests = true
-		template.Settings.RepositorySyncPeriod = "15m"
+		template.Settings.RepositorySyncPeriod = "5m"
 		template.Settings.StaleFileCleanupPeriod = "24h"
 	}
 }

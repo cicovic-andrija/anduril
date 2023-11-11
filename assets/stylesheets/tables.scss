@@ -1,18 +1,19 @@
 @import 'variables';
 
 table {
-    margin-bottom: 24px;
+    margin-top: 8px;
+    margin-bottom: 16;
 }
 
 table th {
     font-weight: bold;
     color: $white;
-    background-color: $orange;
-    padding: 3px;
+    background-color: lighten($orange, 5%);
+    padding: 2px;
     border: solid 1px lighten($base-border-color, 10%);
 }
 
 table td {
-    padding: 3px;
+    padding: 2px;
     border: solid 1px lighten($base-border-color, 10%);
 }
